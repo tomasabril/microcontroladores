@@ -1,0 +1,56 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        08/18/2017  20:46:48  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\leitura.obj TO .\Objects\ex5 PRINT (.\Listings\ex5.m51) RAMSIZE (256)
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\leitura.obj (LEITURA)
+
+
+LINK MAP OF MODULE:  .\Objects\ex5 (LEITURA)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0019H     ABSOLUTE     
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\ex5 (LEITURA)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        LEITURA
+  C:0011H         SYMBOL        AUX
+  C:0000H         SYMBOL        LOOP
+  D:0080H         SYMBOL        P0
+  D:0090H         SYMBOL        P1
+  C:0006H         SYMBOL        ROT
+  C:0000H         LINE#         10
+  C:0002H         LINE#         11
+  C:0004H         LINE#         13
+  C:0006H         LINE#         16
+  C:0007H         LINE#         17
+  C:0009H         LINE#         18
+  C:000CH         LINE#         20
+  C:000FH         LINE#         21
+  C:0011H         LINE#         24
+  C:0014H         LINE#         25
+  C:0016H         LINE#         27
+  C:0017H         LINE#         28
+  -------         ENDMOD        LEITURA
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 0019H BYTE ( 1%) *
+******************************************************************************
+
+Program Size: data=8.0 xdata=0 code=25
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

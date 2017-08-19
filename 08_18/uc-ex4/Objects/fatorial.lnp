@@ -1,0 +1,3 @@
+".\Objects\ex4.obj" 
+TO ".\Objects\fatorial" 
+PRINT(".\Listings\fatorial.m51") RAMSIZE(256) 

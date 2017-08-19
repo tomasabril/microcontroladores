@@ -1,0 +1,75 @@
+A51 MACRO ASSEMBLER  EXERCICIO0                                                           08/18/2017 19:02:17 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02c
+OBJECT MODULE PLACED IN .\Objects\exercicio0.obj
+ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE exercicio0.a51 SET(SMALL) DEBUG PRINT(.\Listings\exercicio0.lst) OBJECT
+                      (.\Objects\exercicio0.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     ;Objetivo: verificar os diferentes tipos de endereçamento
+                       2     
+0000                   3     ORG 0000h
+                       4     
+                       5             ;endereçamento por registrador
+                       6             ;o conteudo do registrador R0
+                       7             ; é copiado para o acumulador
+0000 E8                8             MOV A, R0
+                       9             
+                      10             
+                      11             ;endereçamento direto
+                      12             ;endereco do dado é carregado diretamente da memoria
+0001 E532             13             MOV A, 32h
+                      14             
+                      15             
+                      16             ;enderecamento indireto
+                      17             ;o dado é acesado pelo endereco armazenado
+                      18             ; no registrador R0
+0003 7844             19             MOV R0, #44h
+0005 E6               20             MOV A, @R0
+                      21             
+                      22             
+                      23             ;enderecamento imediato
+                      24             ;o valor do operando esta na instruçao
+                      25             ;o acumulador recebe o decimal 25
+0006 7419             26             MOV A, #25
+                      27             
+                      28             ;enderecamento relativo
+                      29             ;permite saltos para um endereço
+                      30             ;apenas saltos curtos -128 bytes a + 128 bytes
+                      31     ;linhadecima:
+                      32     ;       SJMP pulaum
+                      33     ;       NOP
+                      34     ;pulauma:
+                      35     ;       SJMP linhadecima
+                      36             
+                      37             
+                      38             ;enderecamento absoluto
+                      39             ;permite pular para o endereço dentro
+                      40             ; da mesma pagina de 2k
+                      41             ;AJMP 03h
+                      42             
+                      43             
+                      44             ;enderecamento longo
+                      45             ;permite o salto para qualquer endereco
+0008 0277AC           46             LJMP 77ACh
+                      47             
+                      48             ; Fique na mesma linha para toda a eternidade
+000B 80FE             49             SJMP $
+                      50     
+                      51     END
+A51 MACRO ASSEMBLER  EXERCICIO0                                                           08/18/2017 19:02:17 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

@@ -1,0 +1,43 @@
+A51 MACRO ASSEMBLER  EX1                                                                  08/18/2017 19:20:47 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02c
+OBJECT MODULE PLACED IN .\Objects\ex1.obj
+ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE ex1.a51 SET(SMALL) DEBUG PRINT(.\Listings\ex1.lst) OBJECT(.\Objects\ex1
+                      .obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     ; Analisar as diferencas formas de representacao
+                       2     ; numerica e a movimentação de dados entre registradores
+                       3     
+0000                   4     ORG 0000h
+                       5             
+                       6             ;enderecamento por registrador e imediato
+0000 780B              7             MOV R0, #11                     ;movimenta o numero 11 em decimal para o reg R0
+0002 7911              8             MOV R1, #11h            ;movimenta o numero 11 em hexa para o reg R1
+0004 7A0B              9             MOV R2, #00001011b      ;movimenta o num 11d na notacao binaria
+                      10             
+                      11             ;enderecamentos de registradores
+0006 7B03             12             MOV R3, #3h                     ;movimenta o numero 3 para o reg R3
+0008 EB               13             MOV A, R3                       ; movimenta o conteudo do reg3 para o acc
+0009 FF               14             MOV R7, A                       ;movimenta o conteudo do acc para o R7
+000A 89F0             15             MOV B, R1                       ;movimenta o conteudo do R1 para o B
+                      16             
+                      17             
+                      18     END
+A51 MACRO ASSEMBLER  EX1                                                                  08/18/2017 19:20:47 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

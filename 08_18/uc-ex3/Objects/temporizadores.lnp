@@ -1,0 +1,3 @@
+".\Objects\ex-3.obj" 
+TO ".\Objects\temporizadores" 
+PRINT(".\Listings\temporizadores.m51") RAMSIZE(256) 

@@ -1,0 +1,50 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        08/18/2017  20:30:38  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\ex4.obj TO .\Objects\fatorial PRINT (.\Listings\fatorial.m51) RAMSIZE (256)
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\ex4.obj (EX4)
+
+
+LINK MAP OF MODULE:  .\Objects\fatorial (EX4)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     000CH     ABSOLUTE     
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\fatorial (EX4)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        EX4
+  D:00F0H         SYMBOL        B
+  C:0003H         SYMBOL        FAT
+  C:0000H         SYMBOL        INICIO
+  C:0000H         LINE#         7
+  C:0002H         LINE#         8
+  C:0003H         LINE#         11
+  C:0004H         LINE#         12
+  C:0006H         LINE#         13
+  C:0007H         LINE#         16
+  C:000AH         LINE#         17
+  C:000BH         LINE#         19
+  -------         ENDMOD        EX4
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 000CH BYTE ( 0%) *
+******************************************************************************
+
+Program Size: data=8.0 xdata=0 code=12
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

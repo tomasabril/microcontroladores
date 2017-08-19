@@ -1,0 +1,60 @@
+A51 MACRO ASSEMBLER  LEITURA                                                              08/18/2017 20:46:47 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02c
+OBJECT MODULE PLACED IN .\Objects\leitura.obj
+ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE leitura.a51 SET(SMALL) DEBUG PRINT(.\Listings\leitura.lst) OBJECT(.\Obj
+                      ects\leitura.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     ;realizar a leitura do status da entrada digital
+                       2     ; P0.4 e enviar nivel logico alto para saida P1.0
+                       3     ; e 0 para as demais saidas de P1, quando a entrada for 1
+                       4     ; caso a entrada seja zero todos os bits da P1 devem ser 0
+                       5     
+0000                   6     ORG 0000h
+                       7             
+                       8             ;loop para verifica o estado do pino
+0000                   9             loop:
+0000 E580             10                     MOV A, P0                       ;copio o valor do port para o Acc
+0002 5410             11                     ANL A, #00010000b       ;aplico a mascara em acc
+                      12                     
+0004 7904             13                     MOV R1, #4
+                      14                     
+0006                  15             rot:
+0006 03               16                     RR A
+0007 D9FD             17                     DJNZ R1, rot
+0009 B40105           18                     CJNE A, #1, aux         ;se o acc nao for 1 entao a porta nao esta setada
+                      19                     
+000C 759001           20             Mov P1, #1
+000F 80EF             21             JMP loop
+                      22             
+0011                  23             aux:
+0011 759001           24                     MOV P1, #1
+0014 80EA             25                     JMP loop
+                      26             
+0016 00               27             NOP
+0017 80FE             28             JMP $
+                      29                     
+                      30             
+                      31     END
+A51 MACRO ASSEMBLER  LEITURA                                                              08/18/2017 20:46:47 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+AUX. . . . . . . .  C ADDR   0011H   A   
+LOOP . . . . . . .  C ADDR   0000H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+ROT. . . . . . . .  C ADDR   0006H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)
