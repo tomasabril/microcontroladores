@@ -1,77 +1,64 @@
-;Pratica 2 - Bobinador com motor de passo
+;Pratica 2 - Bobinador, 
 ;Autor: Isabella Mika Taninaka & Tomas Abril
-
-;;;; Como funciona
-; digitar 3 numeros, serão a quantidade de voltas no motor
-; apertar A para sentido horario ou B para anti-horario
-; enquanto o motor gira nada pode ser feito, apenas interrupção para o programa
-; ao final estará escrito FIM, apertar * (asterisco) para recomeçar
-;;;;
 
 ;OPERANDO EM ASCII halfsize
 
 ;Configuracao
-	LCD_RS		EQU	P2.5
-	LCD_RW		EQU	P2.6
-	LCD_EN		EQU	P2.7
-	LCD_DATA	EQU	P0
-	LCD_BUSY	EQU	P0.7
+	LCD_RS 		EQU	P2.5
+	LCD_RW 		EQU	P2.6
+	LCD_EN 		EQU	P2.7
+	LCD_DATA		EQU	P0
+	LCD_BUSY		EQU	P0.7
 	
 		ORG 2000h
+		
+		MOV IE, 		#10000001b
+		MOV IP,			#00000000b
+		MOV TCON, 	#00000001b
+		
 		JMP start
+		
+		ORG 2010h
+			MOV R3, #0
+		RETI
+		
 		ORG 2100h
 
-	delay1sec:
-		dloop3:
-		MOV R7, #150d 
-		;repete delay de 0,5ms 250 vezes
-		delay_do_delay:
-			MOV R6, #100d
-			;gasta 2 us cada vez, 500 us no total
-			delay0:
-				DJNZ R6, delay0
-			DJNZ R7, delay_do_delay
-		DJNZ R0, dloop3
-		RET
-		
-		delay1secDEVERDADE:
-		dloop31:
-		MOV R7, #221d 
-		;repete delay de 0,5ms 250 vezes
-		delay_do_delay1:
-			MOV R6, #250d
-			;gasta 2 us cada vez, 500 us no total
-			delay01:
-				DJNZ R6, delay01
-			DJNZ R7, delay_do_delay1
-		DJNZ R0, dloop31
-		RET
+;;;;;;;;;;;; aqui comeca nossa "main" <<<<<<<<<<<<<<<<<<<<-----------------
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;Escreve Saudacao
 	start:
+		MOV R3, #1
 		MOV 3Bh, #00h
 		MOV 3Ch, #04h
-		ACAL	startLCD
+		MOV R2, #0C0h
+		ACALL	startLCD
+		
+		
 		MOV	DPTR, #hello
 		MOV	B, #80h		;linha 1, coluna 1
 		ACALL	sendString
 
-;;;;;;;;;;;;; aqui comeca nossa "main" <<<<<<<<<<<<<<<<<<<<-----------------
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;Espera Input
-	;tudo vai ser guardado ja em ascii e se nao der problema vai ser show
-	;lembrar de tirar 30h cada vez que for operar 
-
+;Espera entrada
+	
 	waitingInput:
 		;ACALL delay1sec
-		ACALL 	returnPressedKey
+		NOP
+		LCALL 	returnPressedKey
 		MOV A, 2Ah
-		CJNE A, #0FFh, if1		;Arranjar uma solucao melhor que essa pra garantir que a entrada @e de 1 a 9
+		CJNE A, #0FFh, if0		;Arranjar uma solucao melhor que essa pra garantir que a entrada @e de 1 a 9
 		AJMP goBack
 	goBack:
+		MOV	DPTR, #hello
+		MOV	B, #80h		;linha 1, coluna 1
+		ACALL	sendString
 		AJMP	waitingInput
+	
+	if0:
+		CJNE	A,			#00h, 	if1
+		AJMP	valid
 	if1:
 		CJNE	A,			#01h, 	if2
 		AJMP	valid
@@ -100,99 +87,296 @@
 		CJNE	A,			#09h, 	ifa
 		AJMP 	valid
 	ifa:
-		CJNE	A,			#0Ah, 	ifast
+		CJNE	A,			#0Ah, 	ifb
 		AJMP 	valid
 	ifb:
 		CJNE	A,			#0Bh, 	ifast
 		AJMP 	valid
 	ifast:
-		CJNE	A,			#0Eh, 	notValid
+		CJNE	A,			#14h, 	notValid
 		AJMP 	start
 	notValid:
+		MOV		DPTR, #invalidomsg
+		MOV		B, #80h
+		ACALL	sendString
+		MOV		DPTR, #clearmsg
+		MOV		B, #0C0h
+		ACALL	sendString
+		ACALL  returnPressedKey
+		MOV		A, 2Ah
+		MOV 3Bh, #00h
+		MOV 3Ch, #04h
+		CJNE	A, #14h, notValid
 		AJMP	goBack
 	valid:
-		ADD A, #30h		;ascii
-		MOV 2Ah, A
-	writeTitle:
-		MOV DPTR, #title
-		MOV B, #80h
-		ACALL sendString
+		
+		
+; nosso numero de voltas ficara em 3Bh
+	; 3CH e o contador de quantos numeros ja foram digitados, comeca em 4
+		DJNZ 3Ch, numero
+		AJMP sentido
+		numero:
+			MOV A, 2Ah
+			MOV A, 3Ch
+			CJNE A, #03h, dezena
+		centena:
+			MOV A, 2Ah
+			MOV B, A	;Coloca o multiplicando no B
+			MOV A, #100d
+			CLR C
+			MUL AB
+			;;MOV 2Dh, A		;resultado em A
+			ADD A, 3Bh
+			MOV	3Bh, A
+			MOV 3Ah, #0C0h
+			ACALL printvoltas
+			AJMP waitingInput
+		dezena:
+			MOV A, 3Ch
+			CJNE A, #02h, unidade
+			MOV A, 2Ah
+			MOV B, A	;Coloca o multiplicando no B
+			MOV A, #10d
+			CLR C
+			MUL AB
+			;;MOV 2Dh, A		;resultado em A
+			ADD A, 3Bh
+			MOV	3Bh, A
+			INC	3Ah
+			ACALL printvoltas
+					AJMP waitingInput
+		unidade:
+			MOV A, 3Ch
+			CJNE A, #01h, sentido
+			MOV A, 2Ah
+			MOV B, A	;Coloca o multiplicando no B
+			MOV A, #1d
+			CLR C
+			MUL AB
+			;;MOV 2Dh, A		;resultado em A
+			ADD A, 3Bh
+			MOV	3Bh, A
+			MOV	3Bh, A
+			INC	3Ah
+			ACALL printvoltas
+					AJMP waitingInput
+		sentido:
+			MOV A, 3Bh
+			CLR C
+			SUBB A, #255d
+			JC	sentidovalido
+			JNZ	notValid
+			JMP	sentidovalido
+		sentidovalido:
+		velocvalido:
+			MOV DPTR, #velocidademsg 
+			MOV B, #80h
+			ACALL sendString
+			
+			MOV DPTR, #clearmsg
+			MOV B, #0C0h
+			ACALL sendString
+			
+			ACALL returnPressedKey
+			MOV	A, 2Ah
+			CJNE A, #0Ch, ifD
+			AJMP devagar
+			ifD:
+				CJNE A, #0Dh, velocvalido
+				AJMP rapido
+		devagar:
+			MOV R4, #6d
+			MOV DPTR, #devagarmsg
+			MOV B,  #0C0h
+			ACALL sendString
+			AJMP velocidadesetada
+			
+		rapido:
+			MOV R4, #3d
+			MOV DPTR, #rapidomsg
+			MOV B,  #0C0h
+			ACALL sendString
+			AJMP velocidadesetada
+		
+		velocidadesetada:
+			MOV DPTR, #sentidomsg 
+			MOV B, #80h
+			ACALL sendString
+			
+			ACALL returnPressedKey
+			MOV	A, 2Ah
+			CJNE A, #0Ah, antihorario
+		horario:
+			MOV DPTR, #hello
+			MOV B, #80h
+			ACALL sendString
+			
+			MOV A, 3Bh
+			MOV 3Ah, #0C0h
+			ACALL printEq
 
-	; nosso numero de voltas ficará em 3Bh
-	; 3CH é o contador de quantos numeros já foram digitados, comeca em 4
+			ACALL umavoltahorario	
+			MOV A, R3
+			JZ restart1
+			
+			DJNZ 3Bh, horario
+			AJMP fim
+		antihorario:
+			CJNE A, #0Bh, provavelmenteinvalido
+		antihorario1:
+			MOV DPTR, #hello
+			MOV B, #80h
+			ACALL sendString			
+			MOV A, 3Bh
+			MOV 3Ah, #0C0h
+			ACALL printEq
+			ACALL umavoltaantihorario
+			DJNZ 3Bh, antihorario1
+			AJMP fim
+			
+		restart1:
+			LJMP start
+		
+		provavelmenteinvalido:
+			CJNE A, #14h, velocidadesetada
+			AJMP waitingInput
+		
+		presentidovalido:
+			LJMP sentidovalido
 
-	DJNZ 3Ch, giramotor
-	CJNE 3Ch, #03h dezena
-	centena:
-		MOV A, 2Ah
-		MOV B, A	;Coloca o multiplicando no B
-		MOV A, #100d
-		CLR C
-		MUL AB
-		;;MOV 2Dh, A		;resultado em A
-		ADD A, 3Bh
-		AJMP printvoltas
-	dezena:
-	CJNE 3Ch, #02h unidade
-		MOV A, 2Ah
-		MOV B, A	;Coloca o multiplicando no B
-		MOV A, #10d
-		CLR C
-		MUL AB
-		;;MOV 2Dh, A		;resultado em A
-		ADD A, 3Bh
-		AJMP printvoltas
-	unidade:
-	;CJNE 3Ch, #01h ;;nao pode nao ser 1 ;;;
-		MOV A, 2Ah
-		MOV B, A	;Coloca o multiplicando no B
-		MOV A, #1d
-		CLR C
-		MUL AB
-		;;MOV 2Dh, A		;resultado em A
-		ADD A, 3Bh
-		AJMP printvoltas
-
+		
+		fim:
+		MOV	DPTR, #fimmsg
+		MOV	B, #80h		;linha 1, coluna 1
+		ACALL	sendString
+		MOV		DPTR, #clearmsg
+		MOV		B, #0C0h
+		ACALL	sendString
+		ACALL  returnPressedKey
+		MOV		A, 2Ah
+		MOV 3Bh, #00h
+		MOV 3Ch, #04h
+		CJNE	A, #14h, fim
+		AJMP start	
+	
+		
 	printvoltas:
-	;; escreve na tela o valor digitado até agora
-	MOV A, 3Bh
-	MOV B, #88h		;poem o numero
-	ACALL sendNumber
-	AJMP doNothing
+		;; escreve na tela o valor digitado ate agora
+		MOV A, 2Ah
+		ADD A, #30h
+		MOV B, 3Ah
+		ACALL sendNumber
+		RET
 
-	giramotor:
-		MOV A, 3Bh
-		ACALL umavoltahorario
-		DJNZ A, giramotor
+;Funcoes do motor
 
-	fim: 
-		;MOV A, 2Bh
-		;CJNE A, #39h, doNothing
-		;MOV A, 2Ch
-		;CJNE A, #39h, doNothing
-		;CLR P2.0
- 		;ACALL delay1secDEVERDADE
-		;SETB P2.0
-	doNothing:
-		LJMP waitingInput
+	;;aproximadamente 0,01sec provavelmente
+	delayrapido:
+		rloop3:
+		MOV A, R4
+		MOV R7, A 
+		;repete delay de 0,5ms 250 vezes
+		rdelay_do_delay:
+			MOV R6, #1d
+			;gasta 2 us cada vez, 500 us no total
+			rdelay0:
+				DJNZ R6, rdelay0
+			DJNZ R7, rdelay_do_delay
+		DJNZ R0, rloop3
+		RET
 
+	;; dar uma volta no motor de passo
+	;;   a velocidade depende da funcao delay rapido
+	;; reference: https://www.8051projects.net/wiki/Stepper_Motor_Tutorial
+	umavoltahorario:
+		;; em A colocar a quantidade de passos para dar uma volta
+		MOV R2, #4d
+		repetehorario:
+		MOV R1, #129d
+		umpasso_h:
+			MOV A, R3
+			JZ restart
+			AJMP go
+			restart: 
+			RET
+			go:
+			SETB P2.0
+			SETB P2.1
+			CLR P2.2
+			CLR P2.3
+			ACALL delayrapido
+			CLR P2.0
+			SETB P2.1
+			SETB P2.2
+			CLR P2.3
+			ACALL delayrapido
+			CLR P2.0
+			CLR P2.1
+			SETB P2.2
+			SETB P2.3
+			ACALL delayrapido
+			SETB P2.0
+			CLR P2.1
+			CLR P2.2
+			SETB P2.3
+			ACALL delayrapido
+			DJNZ R1, umpasso_h
+		DJNZ R2, repetehorario
+		RET
 
-;;;;;;;;;;;;; aqui acaba nossa "main" <<<<<<<<<<<<<<<<<<<<------------------
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-
+	umavoltaantihorario:
+		;; em A colocar a quantidade de passos para dar uma volta
+		MOV R2, #4d
+		repeteantihorario:
+			MOV R1, #129d
+		umpasso_ah:
+			MOV A, R3
+			JZ antirestart
+			AJMP antigo
+			antirestart: 
+			RET
+			antigo:
+			SETB P2.0
+			CLR P2.1
+			CLR P2.2
+			SETB P2.3
+			ACALL delayrapido
+			CLR P2.0
+			CLR P2.1
+			SETB P2.2
+			SETB P2.3
+			ACALL delayrapido
+			CLR P2.0
+			SETB P2.1
+			SETB P2.2
+			CLR P2.3
+			ACALL delayrapido
+			SETB P2.0
+			SETB P2.1
+			CLR P2.2
+			CLR P2.3
+			ACALL delayrapido
+			DJNZ R1, umpasso_ah
+		DJNZ R2, repeteantihorario
+		RET
+		
 ;;https://stackoverflow.com/questions/14261374/8051-lcd-hello-world-replacing-db-with-variable		
 	number2ascii:							;colocar o numero que quer tranformar em A
-		MOV 	B, 		#10
+		MOV 	B, 		#100d
 		DIV		AB
 		ADD		A, 		#30h
 		MOV 	30h, A
-		INC		DPTR
+		
+		MOV		A, 		B
+		
+		MOV 	B, 		#10d
+		DIV		AB
+		ADD		A, 		#30h
+		MOV 	31h, A
 		
 		MOV		A,			B
 		ADD		A,			#30h
-		MOV		31h, A
+		MOV		32h, A
 		RET
 
 
@@ -201,84 +385,42 @@
 		;multiplicador x multiplicando = resposta
 		;0Bh 'x' 0Ch = A	
 	printEq:
-		MOV		A,			2Bh
-		MOV		B,			#0C0h		;linha 2, coluna 1
-		ACALL				sendNumber
-		
-		MOV 	DPTR,	#x
-		MOV		B,			#0C1h		;linha 2, coluna 3
-		ACALL				sendString
-		
-		MOV		A,			2Ch
-		CJNE	A,	#3Ah, isnt10
-		AJMP is10
-	isnt10:
-		MOV		B,			#0C2h		;linha 2, coluna 5
-		ACALL				sendNumber
-		
-		MOV 	DPTR,	#equal
-		MOV		B,			#0C3h			;linha 2, coluna 7
-		ACALL				sendString
-		
-		MOV		A,			2Dh
 		ACALL number2ascii
 		MOV		A,			30h
-		MOV		B,			#0C4h		;linha 2, coluna 9
+		MOV		B,			3Ah
 		ACALL				sendNumber
-		MOV		A,			2Dh
-		ACALL number2ascii
 		MOV		A,			31h
-		MOV		B,			#0C5h		;linha 2, coluna 9
+		INC		B
 		ACALL				sendNumber		
-		RET
-		
-	is10:
-		MOV		A,			2Ch
-		ACALL number2ascii
-		MOV		A,			30h
-		MOV		B,			#0C4h		;linha 2, coluna 9
-		ACALL				sendNumber
-		MOV		A,			2Dh
-		ACALL number2ascii
-		MOV		A,			31h
-		MOV		B,			#0C5h		;linha 2, coluna 9
-		ACALL				sendNumber	
-		RET
-		
-				MOV 	DPTR,	#equal
-		MOV		B,			#0C3h			;linha 2, coluna 7
-		ACALL				sendString
-		
-		MOV		A,			2Dh
-		ACALL number2ascii
-		MOV		A,			30h
-		MOV		B,			#0C4h		;linha 2, coluna 9
-		ACALL				sendNumber
-		MOV		A,			2Dh
-		ACALL number2ascii
-		MOV		A,			31h
-		MOV		B,			#0C5h		;linha 2, coluna 9
+		MOV		A,			32h
+		INC 		B
 		ACALL				sendNumber		
 		RET
 
 
-;Funcoes Teclado
 ;Funcoes Teclado
 	;http://what-when-how.com/8051-microcontroller/keyboard-interfacing/
-	;retorna FF enquanto nao estiver apertada
-returnPressedKey:
-	MOV	A, 2Ah
-	CJNE A, #0FFh, botValido
-	JMP botFF
-	botValido:
-	MOV 2Eh, 2Ah
-	botFF:
-
+returnPressedKey:						;retorna FF enquanto nao estiver apertada
+	
+		MOV	A, 2Ah
+		CJNE A, #0FFh, botValido
+        JMP botFF
+        botValido:
+        MOV 2Eh, 2Ah
+        botFF:
+	
+	SETB P1.0
+	SETB P1.1
+	SETB P1.2
+	SETB P1.3
+	
+	
 	CLR P1.0
 	JNB P1.4, bot1
 	JNB P1.5, bot2
 	JNB P1.6, bot3
 	JNB P1.7, botA
+	;ACALL shortDelay
 
 	SETB P1.0
 	CLR P1.1
@@ -286,13 +428,15 @@ returnPressedKey:
 	JNB P1.5, bot5
 	JNB P1.6, bot6
 	JNB P1.7, botB
-
+	;ACALL shortDelay
+	
 	SETB P1.1
 	CLR P1.2
 	JNB P1.4, bot7
 	JNB P1.5, bot8
 	JNB P1.6, bot9
 	JNB P1.7, botC
+	;ACALL shortDelay
 
 	SETB P1.2
 	CLR P1.3
@@ -300,6 +444,8 @@ returnPressedKey:
 	JNB P1.5, bot0
 	JNB P1.6, botHASH
 	JNB P1.7, botD
+	;ACALL shortDelay
+	
 	MOV 2Ah, #0FFh
 	JMP fimleitura
 
@@ -334,16 +480,16 @@ returnPressedKey:
 		MOV 2Ah, #00h
 		JMP retornaBotao
 	botA:
-		MOV 2Ah, #10h
+		MOV 2Ah, #0Ah
 		JMP retornaBotao
 	botB:
-		MOV 2Ah, #11h
+		MOV 2Ah, #0Bh
 		JMP retornaBotao
 	botC:
-		MOV 2Ah, #12h
+		MOV 2Ah, #0Ch
 		JMP retornaBotao
 	botD:
-		MOV 2Ah, #13h
+		MOV 2Ah, #0Dh
 		JMP retornaBotao
 	botAST:
 		MOV 2Ah, #14h
@@ -360,19 +506,15 @@ returnPressedKey:
 		;; se o botao apertado ainda e o mesmo esperar delay
 		mesmo:
 			MOV A, 2Eh
-			CLR	C
-			SUBB A, #30h
 			CJNE A, 2Ah, fimleitura
 			ACALL delay1sec
 		fimleitura:
 		RET
 
-;Funcoes do motor
-
-	;;aproximadamente 0,01sec provavelmente
-	delayrapido:
+	delay1sec:
+		MOV		2Fh, #22h
 		dloop3:
-		MOV R7, #3d 
+		MOV R7, #200d 
 		;repete delay de 0,5ms 250 vezes
 		delay_do_delay:
 			MOV R6, #250d
@@ -381,65 +523,14 @@ returnPressedKey:
 				DJNZ R6, delay0
 			DJNZ R7, delay_do_delay
 		DJNZ R0, dloop3
+		MOV		2Fh, #00h
 		RET
-
-	;; dar uma volta no motor de passo
-	;;   a velocidade depende da função delay rapido
-	;; reference: https://www.8051projects.net/wiki/Stepper_Motor_Tutorial
-	umavoltahorario:
-		;; em A colocar a quantidade de passos para dar uma volta
-		MOV A, #64d
-		umpasso_h:
-			SETB P2.0
-			SETB P2.1
-			CLR P2.2
-			CLR P2.3
-			ACALL delayrapido
-			CLR P2.0
-			SETB P2.1
-			SETB P2.2
-			CLR P2.3
-			ACALL delayrapido
-			CLR P2.0
-			CLR P2.1
-			SETB P2.2
-			SETB P2.3
-			ACALL delayrapido
-			SETB P2.0
-			CLR P2.1
-			CLR P2.2
-			SETB P2.3
-			ACALL delayrapido
-			DJNZ A, umpasso_h
+		
+	shortDelay:
+		MOV R6, #200d
+		shortLoop:
+			DJNZ R6, shortLoop
 		RET
-
-	umavoltaantihorario:
-		;; em A colocar a quantidade de passos para dar uma volta
-		MOV A, #64d
-		umpasso_ah:
-			SETB P2.0
-			CLR P2.1
-			CLR P2.2
-			SETB P2.3
-			ACALL delayrapido
-			CLR P2.0
-			CLR P2.1
-			SETB P2.2
-			SETB P2.3
-			ACALL delayrapido
-			CLR P2.0
-			SETB P2.1
-			SETB P2.2
-			CLR P2.3
-			ACALL delayrapido
-			SETB P2.0
-			SETB P2.1
-			CLR P2.2
-			CLR P2.3
-			ACALL delayrapido
-			DJNZ A, umpasso_ah
-		RET
-
 
 
 ;Funcoes do LCD
@@ -529,12 +620,17 @@ returnPressedKey:
 		;JMP		sendWhatsLeftN					;se voltar pro send String vai escrever em cima
 	;endStringN:
 		;RET		
+		
+	hello:	db "N. de Voltas: ", 0
+	sentidomsg: db "Sentido:		",0
+	
+	velocidademsg: db "Velocidade:		",0
+	rapidomsg: db "Rapido		",0
+	devagarmsg: db "Devagar		",0
 
-		
-	hello:	db "Pratica2 ", 0
-	title:		db "Passos  ", 0
-	x: 			db "x", 0
-	buffer:	ds 17
-	equal:	db "=", 0
-		
+	fimmsg:	db "Fim             ", 0
+	invalidomsg:	db "Invalido!       ", 0
+	validomsg:	db "valido!       ", 0
+
+	clearmsg:	db "          ", 0
 	END
