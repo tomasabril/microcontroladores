@@ -4,63 +4,88 @@
 ;OPERANDO EM ASCII halfsize
 
 ;;
-;  P2.0 é o pino de saida no PWM_SETUP
-;  3Bh é o espaco de memoria que controla a largura do pulso. de 0d a 255d
-;  P2.1 e P2.2 são as saidas que vao pro IN1 e IN2 da ponte H
+;  P2.0 e o pino de saida no PWM_SETUP
+;  3Bh e o espaco de memoria que controla a largura do pulso. de 0d a 255d
+;  P2.1 e P2.2 sao as saidas que vao pro IN1 e IN2 da ponte H
 ;; 
 
 ;Configuracao
 	LCD_RS		EQU	P2.5
-	LCD_RW		EQU	P2.6
+	LCD_RW	EQU	P2.6
 	LCD_EN		EQU	P2.7
-	LCD_DATA		EQU	P0
-	LCD_BUSY		EQU	P0.7
+	LCD_DATA	EQU	P0
+	LCD_BUSY	EQU	P0.7
 	
 		ORG 2000h
 		
-		MOV IE, 		#10000001b
-		MOV IP,			#00000000b
-		MOV TCON, 	#00000001b
+		MOV	3Bh, #0
+		CLR P2.0
+		CLR P2.1
+		CLR P2.2
+		
+;		MOV IE, 		#10000001b
+;		MOV IP,			#00000000b
+;		MOV TCON, 	#00000001b
 		
 		JMP start
-		
-		ORG 2010h
-			MOV R3, #0
-		RETI
+
 		
 		
 ;;;;interrupcao do timer 0 ;;;;;;;;;;;;;;;;;;
 ; sobre timers
 ; http://what-when-how.com/8051-microcontroller/programming-8051-timers/
 
-ORG 00Bh
+ORG 200Bh
 TIMER_0_INTERRUPT:
-	; tempo de HIGH é setado baseado em 3Bh, tempo de LOW é FFh -(menos) tempo de high
-	; F0 é apenas um bit para alternar entre as duas funcoes possiveis abaixo
+	;3Bh duty cicle alvo
+	;3Dh duty temporario
+	; tempo de HIGH e setado baseado em 3Bh, tempo de LOW e FFh -(menos) tempo de high
+	; F0 e apenas um bit para alternar entre as duas funcoes possiveis abaixo
 	; tem algo melhor que F0 pra usar? nao sei
 	
 	JB F0, HIGH_DONE	; If F0 flag is set then we just finished
 						; the high section of the cycle so Jump to HIGH_DONE
 	LOW_DONE:
 		SETB F0			; Make F0=1 to indicate start of high section
-		SETB P2.0		; Make PWM output pin High
-		MOV TH0, 3Bh	; Load high byte of timer with 3Bh
+		CLR P2.0		; Make PWM output pin High
+		MOV TH0, 3Dh	; Load high byte of timer with 3Bh
 						; (pulse width control value)
 		CLR TF0			; Clear the Timer 0 interrupt flag
+		ACALL pwm
 		RETI
 	HIGH_DONE:
 		CLR F0			; Make F0=0 to indicate start of low section
-		CLR P2.0		; Make PWM output pin low
+		SETB P2.0		; Make PWM output pin low
 		MOV A, #0FFH	; Move FFH (255) to A
 		CLR C			; Clear C (the carry bit) so it does; not affect the subtraction
-		SUBB A, 3Bh		; Subtract 3Bh from A. A = 255 - 3Bh
+		SUBB A, 3Dh		; Subtract 3Bh from A. A = 255 - 3Bh
 		MOV TH0, A		; so the value loaded into TH0 + 3Bh = 255
 		CLR TF0			; Clear the Timer 0 interrupt flag
 		RETI
 
+	pwm:
+		CLR C
+		MOV A, 3Bh
+		JZ naomuda
+		SUBB A, 3Dh
+		JC diminuidc
+		JZ naomuda
+		JMP aumentadc
+		
+	diminuidc:
+		DEC 3Dh
+		AJMP naomuda
+	
+	aumentadc:
+		INC 3Dh
+		AJMP naomuda
+	
+	naomuda:
+		RET
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 		
-		ORG 2100h
+ORG 2100h
 
 ;;;;;;;;;;;; aqui comeca nossa "main" <<<<<<<<<<<<<<<<<<<<-----------------
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -73,8 +98,9 @@ TIMER_0_INTERRUPT:
 		MOV TMOD,#01h ; Timer0 in Mode 1
 		;; largura do pulso pode ser entre 0 e 255d
 		MOV 3Bh, #0d ; essa memoria controla a largura do pulso
+		MOV 3Dh, #5d
 		SETB EA 	; Enable Interruptions
-		;;SETB ET0 ; Enable Timer 0 Interrupt; se ja ligou todas não precisa, certo?
+		SETB ET0 ; Enable Timer 0 Interrupt; se ja ligou todas nao precisa, certo?
 		SETB TR0 ; Start Timer
 		
 		ACALL paramotor
@@ -86,7 +112,7 @@ TIMER_0_INTERRUPT:
 		ACALL	startLCD
 		
 		
-		MOV	DPTR, #hello
+		MOV	DPTR, #motorparado
 		MOV	B, #80h		;linha 1, coluna 1
 		ACALL	sendString
 
@@ -140,31 +166,56 @@ TIMER_0_INTERRUPT:
 		
 		
 	girahorario:
-		;; falta mostrar firecao do motor no LCD
+		MOV	DPTR, #horariomsg
+		MOV	B, #0C0h		;linha 1, coluna 1
+		ACALL	sendString
 		ACALL umavoltahorario
 		AJMP waitingInput
 	giraantihorario:
+		MOV	DPTR, #antihorariomsg
+		MOV	B, #0C0h		;linha 1, coluna 1
+		ACALL	sendString
 		ACALL umavoltaantihorario
 		AJMP waitingInput
 	
 	apertouzero:
+		MOV	DPTR, #motorparado
+		MOV	B, #80h		;linha 1, coluna 1
+		ACALL	sendString
+		MOV	DPTR, #clearmsg
+		MOV	B, #0C0h		;linha 1, coluna 1
+		ACALL	sendString
 		ACALL paramotor
 		AJMP waitingInput
 
 	perc20:
-		;; falta mostrar velocidade do motor do LCD
+		MOV	DPTR, #msg20
+		MOV	B, #80h		;linha 1, coluna 1
+		ACALL	sendString
 		MOV 3Bh, #51d
 		AJMP valid
 	perc40:
+		MOV	DPTR, #msg40
+		MOV	B, #80h		;linha 1, coluna 1
+		ACALL	sendString
 		MOV 3Bh, #102d
 		AJMP valid
 	perc60:
+		MOV	DPTR, #msg60
+		MOV	B, #80h		;linha 1, coluna 1
+		ACALL	sendString
 		MOV 3Bh, #153d
 		AJMP valid
 	perc80:
+		MOV	DPTR, #msg80
+		MOV	B, #80h		;linha 1, coluna 1
+		ACALL	sendString
 		MOV 3Bh, #204d
 		AJMP valid
 	perc100:
+		MOV	DPTR, #msg100
+		MOV	B, #80h		;linha 1, coluna 1
+		ACALL	sendString
 		MOV 3Bh, #255d
 		AJMP valid
 
@@ -173,15 +224,15 @@ TIMER_0_INTERRUPT:
 		AJMP waitingInput
 
 
-		fim:
-		MOV	DPTR, #fimmsg
-		MOV	B, #80h		;linha 1, coluna 1
-		ACALL	sendString
-		MOV		DPTR, #clearmsg
-		MOV		B, #0C0h
-		ACALL	sendString
-
-		AJMP start
+;		fim:
+;		MOV	DPTR, #fimmsg
+;		MOV	B, #80h		;linha 1, coluna 1
+;		ACALL	sendString
+;		MOV		DPTR, #clearmsg
+;		MOV		B, #0C0h
+;		ACALL	sendString
+;
+;		AJMP start
 	
 
 
@@ -379,9 +430,8 @@ returnPressedKey:						;retorna FF enquanto nao estiver apertada
 		RET
 
 	delay1sec:
-		MOV		2Fh, #22h
 		dloop3:
-		MOV R7, #170d 
+		MOV R7, #100d 
 		;repete delay de 0,5ms 250 vezes
 		delay_do_delay:
 			MOV R6, #250d
@@ -390,7 +440,6 @@ returnPressedKey:						;retorna FF enquanto nao estiver apertada
 				DJNZ R6, delay0
 			DJNZ R7, delay_do_delay
 		DJNZ R0, dloop3
-		MOV		2Fh, #00h
 		RET
 		
 	shortDelay:
@@ -488,16 +537,15 @@ returnPressedKey:						;retorna FF enquanto nao estiver apertada
 	;endStringN:
 		;RET		
 		
-	hello:	db "Motor Parado: ", 0
-	sentidomsg: db "Sentido:		",0
-	
-	velocidademsg: db "Velocidade:		",0
-	rapidomsg: db "Rapido		",0
-	devagarmsg: db "Devagar		",0
-
-	fimmsg:	db "Fim             ", 0
-	invalidomsg:	db "Invalido!       ", 0
-	validomsg:	db "valido!       ", 0
-
-	clearmsg:	db "          ", 0
+	motorparado:	db "Motor Parado ", 0
+	msg20:			db "20%               ", 0
+	msg40:			db "40%               ", 0
+	msg60:			db "60%               ", 0
+	msg80:			db "80%               ", 0
+	msg100:		db "100%             ", 0
+	horariomsg:	db "Horario          ", 0
+	antihorariomsg:db"Antihorario     ",0
+	clearmsg:		db "                    ", 0
+	invalidomsg:	db "Invalido!         ", 0
 	END
+
