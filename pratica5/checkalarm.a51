@@ -22,10 +22,6 @@ BOT EQU 30h         ;<< mudar
 ; até setar uma memoria atraves da interrupcao do botao
 ;; ;; ;; ;;
 checkalarm:
-    MOV A, SEC
-    CLR C
-    SUBB A, ASEC
-    JNZ horario_diferente
     MOV A, MIN
     CLR C
     SUBB A, AMIN
