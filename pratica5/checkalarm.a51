@@ -46,6 +46,8 @@ checkalarm:
         ACAL delay1sec
         JMP alarm_on
 
-alarm_off:
-horario_diferente:
-    RET
+    alarm_off:
+        CLR BUZ
+        CLR LED
+    horario_diferente:
+        RET
