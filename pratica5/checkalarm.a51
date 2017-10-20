@@ -5,15 +5,15 @@ SEC EQU 50h
 MIN EQU 51h
 HOR EQU 52h
 ;do despertador
-ASEC EQU 53h
+ASEC EQU 53h        ;<< mudar
 AMIN EQU 54h
 AHOR EQU 55h
 
-BUZ EQU P2.1
+BUZ EQU P2.1        ;<< mudar
 LED EQU P2.2
 
 ;memoria usada como flag do botao de interrupção
-BOT EQU 30h
+BOT EQU 30h         ;<< mudar
 
 
 ;; ;; ;; ;;
