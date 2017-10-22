@@ -1,15 +1,15 @@
 ;Projeto Minimo
 
 ;----- DECLARACOES UNIVERSAIS ----------------------------------
-	org 0000h
+	ORG 2000h
 ;--------DECLARACOES EXTRAS -----------------------------------
-	AUX_A 				EQU R0
-	AMOSTRAGEM	EQU R3
+	AUX_A 				EQU R5
+	AMOSTRAGEM			EQU R3
 	MULT				EQU R4
-	LED1 				EQU P3.6
+	LED 				EQU P3.6
 	LED2 				EQU P1.4
 ;--------DECLARACOES DELAYS -----------------------------------
-	DELAY_TIME 		EQU	R1
+	DELAY_TIME 		EQU	32h
 	TF					EQU TF0		;mudar se precisar usar o Timer 0
 	TR					EQU TR0		
 ;--------DECLARACOES LCD --------------------------------------
@@ -17,48 +17,50 @@
 	LCD_RW 			EQU	P2.6
 	LCD_EN 			EQU	P2.7
 	LCD_DATA 		EQU	P0
-	LCD_BUSY			EQU	P0.7
+	LCD_BUSY		EQU	P0.7
 	LCD_POSITION 	EQU	R2
 	
 ;--------DECLARACOES TECLADO ----------------------------------
-	COL1 	EQU P2.0
-	COL2 	EQU P2.1
-	COL3	EQU P2.2
-	COL4 	EQU P2.3
+	COL1 	EQU P1.0
+	COL2 	EQU P1.1
+	COL3	EQU P1.2
+	COL4 	EQU P1.3
 
-	LIN1 		EQU P1.4
-	LIN2		EQU P2.4
-	LIN3 		EQU P3.3
-	LIN4 		EQU P3.5
+	LIN1 	EQU P1.4
+	LIN2	EQU P1.5
+	LIN3 	EQU P1.6
+	LIN4 	EQU P1.7
 ;--------DECLARACOES SPI ---------------------------------------
 	BDRCON EQU 9Bh
 ;--------DECLARACOES ADC --------------------------------------
 	DO 	EQU P1.5
-	DI		EQU P1.7
+	DI	EQU P1.7
 	CK 	EQU P1.6
 	CS 	EQU P1.1
 	
 ;--------DECLARACOES I2P e RTC --------------------------------------
-	P4 DATA 0C0h
+	;P4 DATA 0C0h
 	
-	SDA		EQU	P4.1
-	SCL		EQU	P4.0
+	SDA		EQU	0C1h
+	SCL		EQU	0C0h
+	SIZE 	EQU	R6
+
 	
-	;leitura e escrita do RTC
-	RADDR	EQU	0xD1
-	WADDR	EQU	0xD0
+	;;leitura e escrita do RTC
+	;RADDR	EQU	0xD1
+	;WADDR	EQU	0xD0
 	
-	SSCON	EQU	93h
-	SSCS	EQU	94h
-	SSDAT	EQU	95h
-	SSADR	EQU	96h
+	;SSCON	EQU	93h
+	;SSCS	EQU	94h
+	;SSDAT	EQU	95h
+	;SSADR	EQU	96h
 	
-	;SSCON
-	SSIE		EQU	0x40
-	STA		EQU	0x20
-	STO		EQU	0x10
-	SI			EQU	0x08
-	AA		EQU	0x04
+	;;SSCON
+	;SSIE	EQU	0x40
+	;STA		EQU	0x20
+	;STO		EQU	0x10
+	;SI		EQU	0x08
+	;AA		EQU	0x04
 	
 	;hora
 	SEC 		EQU 50h
@@ -66,13 +68,23 @@
 	HOU 		EQU 52h
 	DAY 		EQU 53h
 	DAT 		EQU 54h
-	MON		EQU 55h
+	MON			EQU 55h
 	YEA 		EQU 56h
 	CTR 		EQU 57h
+		
+	;do despertador
+	ASEC EQU 58h
+	AMIN EQU 59h
+	AHOR EQU 60h
+		
+	BUZ EQU P2.0        ;<< mudar
+
+	;memoria usada como flag do botao de interrupção
+	BOT EQU 61h         ;<< mudar
 	
 	;funcao de i2c
 	B2W		EQU 66h 	; bytes to write
-	B2R 		EQU 67h 	; bytes to read
+	B2R 	EQU 67h 	; bytes to read
 	ADDR 	EQU 68h 	; internal register address
 	DBASE 	EQU 69h 	; endereco base dos dados a serem escritos.
 	I2C_BUSY EQU 00h	; 0 livre, 1 ocupada
@@ -96,10 +108,19 @@
 	ACALL int_i2c
 	RETI
 	
+	ORG 2010h		; interrupcao do botao
+		MOV BOT, #1
+		RETI
+		
+		;timer 1
+	ORG 201Bh
+		ACALL int_timer1
+	RETI
+	
 	
 ;----- MAIN -----------------------------------------------------
 ;--------Inicializacao ---------------------------------------------
-	ORG 207Bh
+	ORG 2100h
 	init:
 		ACALL startLCD
 		
@@ -108,41 +129,51 @@
 		MOV IEN1, #0x00
 
 		;timer0
-		MOV TMOD, #0x01
+		MOV TMOD, #0x11
 		
-		;i2c
-		SETB SCL
-		SETB SDA
-		MOV SSCON, #01000001b
+		;;i2c
+		;SETB SCL
+		;SETB SDA
+		;MOV SSCON, #01000001b
 		
-		;interrupcoes
-		MOV IPL1, #0x02
-		MOV IPH1, #0x02
-		MOV IEN1, #0x02
+		;;interrupcoes
+		;MOV IPL1, #0x02
+		;MOV IPH1, #0x02
+		;MOV IEN1, #0x02
 		
 		SETB EA
 		
-		ACALL initialTime
+		ACALL initTime
 		ACALL setTime
+		
+		
+		MOV TH1,#0F0h
+		SETB ET1
+		
 		
 ;--------Start ---------------------------------------------------
 	mainloop:
-	MOV R7, #0x05
-		reload:
-		CPL LED1			; toggle no led
-		MOV R6, #0x04		; 4x
-			again:
-			MOV MULT, #0xFA		; 250x
-			ACALL runT0			; 0.5ms
-			DJNZ R6, again		; = 1s
+		SETB TR1
 
-		DJNZ R7, reload		; 5s
-
-	ACALL	getTime
-	MOV LCD_POSITION, #80h
-	ACALL printTime
-
- 	JMP mainloop
+		;se A pressionado -> setar alarme
+		LCALL returnPressedKey
+		CLR TR1
+		MOV A, 2Ah
+		CJNE A, #0Ah, checkb
+		ACALL set_alarm_time
+		
+		;se B pressionado -> setar horario
+		checkb:
+		CLR TR1
+		MOV A, 2Ah
+		CJNE A, #0Bh, alarm
+		ACALL atualiza_hora
+	
+		;conferir se precisa ligar alarme
+		alarm:
+		ACALL checkalarm
+		
+		JMP mainloop
 
 ;----- MAIN FIM --------------------------------------------------
 
@@ -150,6 +181,149 @@
 
 
 ;----- FUNCOES--------------------------------------------------
+
+;; ;; ;; ;;
+; compara se horario atual Eigual ao do alarme
+; ser for, pisca buzzer e led em 1 Hz
+; atEsetar uma memoria atraves da interrupcao do botao
+;; ;; ;; ;;
+checkalarm:
+    MOV A, MIN
+    CLR C
+    SUBB A, AMIN
+    JNZ horario_diferente
+    MOV A, HOU
+    CLR C
+    SUBB A, AHOR
+    JNZ horario_diferente
+    ;se chegou atEaqui Eigual, vamos disparar alarme
+    alarm_on:
+        MOV A, BOT
+        JNZ alarm_off
+        SETB BUZ
+        SETB LED
+        ACALL timerDelay20ms
+        CLR BUZ
+        CLR LED
+        ACALL runT0
+        JMP alarm_on
+
+    alarm_off:
+        CLR BUZ
+        CLR LED
+		MOV BOT , #00h
+    horario_diferente:
+        RET
+
+;; ;; ;; ;;
+;; le hora, minuto, segundo do TECLADO
+;; e salva na memoria
+;; esse Eo horario que o alarme vai tocar
+;; ;; ;; ;;
+sendStringAlarm:
+	INC LCD_POSITION
+	ADD A, #30h
+	ACALL sendNumber
+	CLR C
+	SUBB A, #30h
+	RET
+
+set_alarm_time:
+    ;pegando dezena da hora
+    MOV LCD_POSITION, #80h
+	MOV DPTR, #alarme
+	ACALL sendString
+	
+	MOV LCD_POSITION, #8Ah
+	
+	ACALL returnPressedKey
+    MOV A, 2Ah
+	ACALL sendStringAlarm
+    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
+    RL A
+    RL A
+    RL A
+    MOV 2Bh, A          ;conferir se não esta em conflito
+    ;pegando unidade
+    ACALL returnPressedKey
+    MOV A, 2Ah
+	ACALL sendStringAlarm
+    ORL A, 2Bh          ;juntando pra formar o numero completo
+    MOV AHOR, A
+	
+	INC LCD_POSITION
+	MOV DPTR, #doispontos
+	ACALL sendString
+	
+    ;pegando dezena do minuto
+    ACALL returnPressedKey
+    MOV A, 2Ah
+	ACALL sendStringAlarm
+    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
+    RL A
+    RL A
+    RL A
+    MOV 2Bh, A          ;conferir se não esta em conflito
+    ;pegando unidade
+    ACALL returnPressedKey
+    MOV A, 2Ah
+	ACALL sendStringAlarm
+    ORL A, 2Bh          ;juntando pra formar o numero completo
+    MOV AMIN, A
+
+    RET
+	
+;; ;; ;; ;;
+;; le hora, minuto, segundo do TECLADO
+;; e grava no relogio
+;; ;; ;; ;;
+atualiza_hora:
+    ;pegando dezena da hora
+    ACALL returnPressedKey
+    MOV A, 2Ah
+    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
+    RL A
+    RL A
+    RL A
+    MOV 2Bh, A          ;conferir se não esta em conflito
+    ;pegando unidade
+    ACALL returnPressedKey
+    MOV A, 2Ah
+    ORL A, 2Bh          ;juntando pra formar o numero completo
+    MOV HOU, A
+
+    ;pegando dezena do minuto
+    ACALL returnPressedKey
+    MOV A, 2Ah
+    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
+    RL A
+    RL A
+    RL A
+    MOV 2Bh, A          ;conferir se não esta em conflito
+    ;pegando unidade
+    ACALL returnPressedKey
+    MOV A, 2Ah
+    ORL A, 2Bh          ;juntando pra formar o numero completo
+    MOV MIN, A
+
+    ;pegando dezena do segundo
+    ACALL returnPressedKey
+    MOV A, 2Ah
+    RL A                   ;;mandar pros mais significativos, o valor final ficara em BCD
+    RL A
+    RL A
+    RL A
+    MOV 2Bh, A          ;conferir se não esta em conflito
+    ;pegando unidade
+    ACALL returnPressedKey
+    MOV A, 2Ah
+    ORL A, 2Bh          ;juntando pra formar o numero completo
+    MOV SEC, A
+
+    ;;enviando para RTC
+    ACALL setTime
+    RET
+
 ;--------FUNCAO DELAY ------------------------------------------
 	timerDelay20ms:
 		MOV R6, #200d
@@ -172,18 +346,120 @@
 
 ;--------FUNCAO LCD --------------------------------------------
 	printTime:
+		MOV R0, #53h			;começa na proxima posicao
+		MOV R7, #3
+		printTimeLoop:
+			INC LCD_POSITION
+			DEC R0
+			
+			MOV A, @R0
+			ACALL bcdtoascii
+			MOV A, 30h
+			ACALL sendNumber
+			
+			INC LCD_POSITION
+			MOV A, 31h
+			ACALL sendNumber
+			
+			INC LCD_POSITION
+			MOV DPTR, #doispontos
+			ACALL sendString
+			
+			DJNZ R7, printTimeLoop
+			
+			MOV DPTR, #smallclear
+			ACALL sendString
+		RET
+		
+	printDays:
+		MOV A, YEA
 		ACALL bcdtoascii
-		MOV A, 31h
-		ACALL sendNumber
-		INC LCD_POSITION
 		MOV A, 30h
 		ACALL sendNumber
+		
+		INC LCD_POSITION
+		MOV A, 31h
+		ACALL sendNumber
+		
+		INC LCD_POSITION
+		MOV DPTR, #traco
+		ACALL sendString
+		
+		INC LCD_POSITION
+		MOV A, MON
+		ACALL bcdtoascii
+		MOV A, 30h
+		ACALL sendNumber
+		
+		INC LCD_POSITION
+		MOV A, 31h
+		ACALL sendNumber
+		
+		INC LCD_POSITION
+		MOV DPTR, #traco
+		ACALL sendString
+		
+		INC LCD_POSITION
+		MOV A, DAT
+		ACALL bcdtoascii
+		MOV A, 30h
+		ACALL sendNumber
+		
+		INC LCD_POSITION
+		MOV A, 31h
+		ACALL sendNumber
+		
+		INC LCD_POSITION
+		MOV DPTR, #smallclear
+		ACALL sendString
+		
+		INC LCD_POSITION
+		MOV A, DAY
+		
+		printDaysif1:
+			CJNE	A,			#01h, 	printDaysif2
+			MOV DPTR, #domingo
+			ACALL sendString
+			AJMP	printDaysfim
+		printDaysif2:
+			CJNE	A,			#02h, 	printDaysif3
+			MOV DPTR, #segunda
+			ACALL sendString	
+			AJMP	printDaysfim
+		printDaysif3:
+			CJNE	A,			#03h, 	printDaysif4
+			MOV DPTR, #terca
+			ACALL sendString		
+			AJMP	printDaysfim
+			
+		printDaysif4:
+			CJNE	A,			#04h, 	printDaysif5
+			MOV DPTR, #quarta
+			ACALL sendString		
+			AJMP	printDaysfim
+			
+		printDaysif5:
+			CJNE	A,			#05h, 	printDaysif6
+			MOV DPTR, #quinta
+			ACALL sendString	
+			AJMP	printDaysfim
+			
+		printDaysif6:
+			CJNE	A,			#06h, 	printDaysif7
+			MOV DPTR, #sexta
+			ACALL sendString		
+			AJMP	printDaysfim
+			
+		printDaysif7:
+			CJNE	A,			#07h, 	printDaysfim
+			MOV DPTR, #sabado
+			ACALL sendString
+			
+			AJMP	printDaysfim
+		printDaysfim: 
 		RET
 		
 ;; recebe valor em Acc
-;; apaga valores de R2, R3
-;; retorna em Acc unidade
-;; retorna em R3 dezena
 bcdtoascii:
     MOV 30h, A       ;Mantem copia de BCD original em r2
     ANL A, #0Fh     ;zera primeiros 4 bits que contem algarismo de dezena
@@ -196,6 +472,7 @@ bcdtoascii:
     RR A
     RR A
     ORL A, #30h     ;somando 30h pra virar ascii
+	MOV 30h, A
 	RET
 	
 	
@@ -273,6 +550,7 @@ bcdtoascii:
 		MOV		A, AUX_A
 		ACALL 	sendDataMode
 		RET
+		
 ;--------FUNCAO TECLADO ---------------------------------------
 returnPressedKey:
 		MOV 	DELAY_TIME, #0Ah 		// R0 x 20 ms de delay - para nao sentir o efeito de bounce no teclado matricial
@@ -365,8 +643,8 @@ returnPressedKey:
 			MOV 	2Ah, A
 			RET
 			
-;--------FUNCOES RTC --------------------------------------------
-initialTime:
+;--------FUNCOES RTC e I2C--------------------------------------------
+initTime: ;inicia o tempo e o I2C
 	MOV SEC, #00h ; BCD segundos, deve ser iniciado 
 								; com valor PAR para o relogio funcionar.
 	MOV MIN, #00h ; BCD minutos
@@ -377,363 +655,180 @@ initialTime:
 	MOV MON, #10h ; Mes
 	MOV YEA, #17h ; Ano
 	MOV CTR, #00h ; SQW desativada em nivel 0
+	
+	SETB SDA
+	SETB SCL
 	RET
 
+	;nao parece ter funcionando usando as flags STA e STO, entao vou fazer na mao
+restart:
+	CLR SCL
+	SETB SDA
+	NOP
+	SETB SCL
+	CLR SDA
+	RET
+
+start:
+	SETB SCL
+	NOP
+	CLR SDA
+	CLR SCL
+	RET
+	
+stop:
+	CLR SCL
+	CLR SDA
+	SETB SCL
+	SETB SDA
+	RET
+
+send:
+	MOV SIZE, #08
+	sendback:
+		CLR SCL
+		RLC A
+		MOV SDA, C
+		SETB SCL
+		DJNZ SIZE, sendback
+	CLR SCL
+	SETB SDA
+	SETB SCL
+	MOV C, SDA
+	CLR SCL
+	RET
+
+receive:
+	MOV SIZE, #08
+	receiveback:
+		CLR SCL
+		SETB SCL
+		MOV C, SDA
+		RLC A
+		DJNZ SIZE, receiveback
+	CLR SCL
+	SETB SDA
+	RET
+	
+ack:
+	CLR SDA
+	SETB SCL
+	CLR SCL
+	SETB SDA
+	RET
+
+nack:
+	SETB SDA
+	SETB SCL
+	CLR SCL
+	SETB SCL
+	RET
+
+;7-Bit format: 0b1101000 = 0x68
+;Slave address for I2C Write: 0b11010000 = 0xD0
+;Slave address for I2C Read: 0b11010001 = 0xD1
+i2cCheckSend:
+	ACALL send
+	;JNC i2cCheckSend		;slave nao enviou ACK 
+	RET
+	
 setTime:
-	MOV ADDR, #0x00		; endereco do reg interno
-	MOV B2W, #(8+1) 	; a quantidade de bytes que deverao 
-						; ser enviados + 1.
-	MOV B2R, #(0+1)		; a quantidade de bytes que serao 
-						; lidos + 1.
-	MOV DBASE, #SEC		; endereco base dos dados
-
-	; gera o start, daqui pra frente e tudo na interrupcao.
-	MOV A, SSCON
-	ORL A, #STA
-	MOV SSCON, A
-
-	; devemos aguardar um tempo "suficiente"
-	; para ser gerada a interrupcao de START
-	MOV MULT, #0xA ; 5ms
-	LCALL runT0
-
-	JB I2C_BUSY, $
-
+	;SEND SLAVE ADDRESS
+	ACALL start
+	
+	MOV A, #0D0h
+	ACALL i2cCheckSend
+	
+	;SEND REGISTER ADDRESS
+	
+	MOV A, #00h
+	
+	ACALL i2cCheckSend	
+	
+	MOV	R0, #50h		;ENDERECO NA MEMORIA DO SEGUNDO
+	MOV AUX_A, #8
+	
+	setTimeLoop:
+		MOV A, @R0
+		ACALL i2cCheckSend	;a cada send incrementa o endereco dos registradores internos
+		INC R0
+		DJNZ AUX_A, setTimeLoop
+	
+	ACALL stop	
 	RET
 	
 getTime:
- 	MOV ADDR, #0x00		; endereco do reg interno
-	MOV B2W, #(0+1) 	; a quantidade de bytes que deverao 
-						; ser enviados + 1.
-	MOV B2R, #(3+1)		; a quantidade de bytes que serao 
-	 					; lidos + 1.
-	MOV DBASE, #SEC		; endereco base dos dados (buffer)
+	;DUMMY WRITE
+	;SEND SLAVE ADDRESS
+	ACALL start
+	
+	MOV A, #0D0h
+	ACALL i2cCheckSend
+	
+	;SEND REGISTER ADDRESS
+	
+	MOV A, #00h
+	ACALL i2cCheckSend	
 
-	; gera o start, daqui pra frente e tudo na interrupcao.
-	MOV A, SSCON
-	ORL A, #STA
-	MOV SSCON, A
-
-	; devemos aguardar um tempo "suficiente"
-	; para ser gerada a interrupcao de START
-	MOV MULT, #0xA
-	LCALL runT0
-
-	JB I2C_BUSY, $
-
+	ACALL restart
+	
+	MOV A, #0D1h
+	ACALL i2cCheckSend	
+	
+	MOV R0, #50h
+	MOV AUX_A, #8
+	
+	getTimeLoop:
+		ACALL receive
+		MOV @R0, A
+		INC R0
+		
+		CJNE AUX_A, #1, SendAck
+		ACALL nack
+		JMP nextRead
+		
+		sendAck:
+			ACALL ack
+		nextRead:
+			DJNZ AUX_A, getTimeLoop
+			ACALL stop
 	RET
 ;----- FUNCOES FIM ----------------------------------------------
 
 ;----- Interrupcoes INICIO ----------------------------------------------
 int_i2c:
-	CPL LED2 ; "pisca" um led na int somente para debug.
-   	
-	MOV A, SSCS ; pega o valor do Status
-	RR A		; faz 1 shift (divide por 2)
+RET
 
-	LCALL decode ; opera o PC, faz cair exatamente no
-				 ; local correto abaixo.
-								 
-	; Como isso funciona? :
-	; cada LJMP tem 3 bytes, NOP 1 byte.
-	; LJMP + NOP = 4 bytes.
-	; os codigos de retorno do SSCS sao multiplos de 8, 
-	; dividindo por 2 ficam multiplos de 4
-	; quando "chamamos" decode com LCALL, o PC de retorno (
-	; que e o primeiro LJMP abaixo deste comentario)
-	; fica salvo na pilha.
-	; capturo o PC de retorno da pilha e somo esse multiplo.
-	; quando acontecer o RET, estaremos no LJMP exato
-	; para atender a int!
-	
-	; Erro no Bus (00h)
-	LJMP ERRO ; 0
-	NOP
-	; start	(8h >> 1 = 4)
-	LJMP START
-	NOP	
-	; re-start (10h >> 1 = 8)
-	LJMP RESTART
-	NOP
-	; W ADDR ack (18h >> 1 = 12)
-	LJMP W_ADDR_ACK
-	NOP
-	; W ADDR Nack (20h >> 1 = 16)
-	LJMP W_ADDR_NACK
-	NOP
-	; Data ack W (28h >> 1 = 20)
-	LJMP W_DATA_ACK
-	NOP
-	; Data Nack W (30h >> 1 = 24)
-	LJMP W_DATA_NACK
-	NOP
-	; Arb-Lost (38h >> 1  = 28)
-	LJMP ARB_LOST
-	NOP
-	; R ADDR ack (40h >> 1 = 32)
-	LJMP R_ADDR_ACK
-	NOP
-	; R ADDR Nack (48h >> 1 = 36)
-	LJMP R_ADDR_NACK
-	NOP
-	; Data ack R (50h >> 1 = 40)
-	LJMP R_DATA_ACK
-	NOP
-	; Data Nack R (58h >> 1 = 44)
-	LJMP R_DATA_NACK
-	NOP
+int_timer1:
+			;escreve hora atual no LCD
+			;CPL LED1			; toggle no led
+			MOV R6, #0x03		; 4x
+				again:
+				MOV MULT, #0xFA		; 250x
+				ACALL runT0			; 0.5ms
+				DJNZ R6, again		; = 1s
 
-	; slave receive nao implementado
-	LJMP not_impl
-	NOP ; 60
-	LJMP not_impl
-	NOP ; 68
-	LJMP not_impl
-	NOP ; 70
-	LJMP not_impl
-	NOP ; 78
-	LJMP not_impl
-	NOP ; 80
-	LJMP not_impl
-	NOP ; 88
-	LJMP not_impl
-	NOP ; 90
-	LJMP not_impl
-	NOP ; 98
-	LJMP not_impl
-	NOP ; A0
-	;slave transmit nao implementado
-	LJMP not_impl
-	NOP ; A8
-	LJMP not_impl
-	NOP ; B0
-	LJMP not_impl
-	NOP ; B8
-	LJMP not_impl
-	NOP ; C0
-	LJMP not_impl
-	NOP ; C8
-
-	; codigos nao implementados
-	LJMP not_impl
-	NOP ; D0
-	LJMP not_impl
-	NOP ; D8
-	LJMP not_impl
-	NOP ; E0
-	LJMP not_impl
-	NOP ; E8
-	LJMP not_impl
-	NOP ; F0
-
-	; nada a ser feito (apenas "cai" no fim da int)
-	LJMP end_i2c_int
-	NOP ; F8
-;------------------------------------------------------------
-not_impl:
-end_i2c_int:
-	RETI
-;============================================================
-; Esta e a funcao que opera o PC e faz o retorno
-; ir para o local correto.
-;============================================================
-decode:
-	POP DPH
-	POP DPL			; captura o PC "de retorno"
-	ADD A, DPL
-	MOV DPL, A		; soma nele o valor de A (A = SSCS/2)
-	JNC termina
-	MOV A, #1
-	ADD A, DPH		; se tiver carry, aumenta a parte alta.
-	MOV DPH, A
-termina:
-	PUSH DPL		; poem o novo pc na pilha 
-	PUSH DPH		; e ...
-	RET				; pula pra ele!
-
-
-;------------------------------------------------------------
-; Aqui se iniciam as "verdadeiras" ISRs
-; A implementacao dessas ISRs seguiu os modelos 
-; propostos no datasheet
-; Porem nao foram implementadas todas as possibilidades
-; para todos os codigos
-; foram implementadas apenas as necessarias para garantir
-; um fluxo de dados de escrita e leitura como master, 
-; contemplando inclusive as possiveis falhas
-;------------------------------------------------------------
-ERRO:
-	MOV A, SSCON
-	ANL A, #STO ; gera um stop
-	MOV SSCON, A
-	CLR	I2C_BUSY ; zera o flag de ocupado
-	LJMP end_i2c_int
-;------------------------------------------------------------
-START:
-; um start SEMPRE vai ocasionar uma escrita
-; pois para ler, preciso primeiro escrever de onde vou ler!
-; SSDAT = SLA + W
-; STO = 0 e SI = 0
-	SETB I2C_BUSY		; seta o flag de ocupado
-	MOV SSDAT, #WADDR
-	MOV A, SSCON
-	ANL A, #~(STO | SI)	; zera os bits STO e SI
-	MOV SSCON, A
-	LJMP end_i2c_int
-;------------------------------------------------------------
-RESTART:
-; o Restart sera utilizado apenas para leituras,
-; onde ha a necessidade de fazer um
-; start->escrita->restart->leitura->stop
-; SSDAT = SLA + R
-; STO = 0 e SI = 0
-	MOV SSDAT, #RADDR
-	MOV A, SSCON
-	ANL A, #~(STO | SI)	; zera os bits STO e SI
-	MOV SSCON, A
-	LJMP end_i2c_int
-;------------------------------------------------------------
-W_ADDR_ACK:
-; apos um W_addr_ack temos que escrever o
-; registrador interno!
-; SSDAT = ADDR
-; STA = 0, STO = 0, SI = 0
-	MOV SSDAT, ADDR
-	MOV A, SSCON
-	ANL A, #~(STA | STO | SI)	; zera os bits STA, STO e SI
-	MOV SSCON, A
-	LJMP end_i2c_int
-;------------------------------------------------------------
-W_ADDR_NACK:
-; em caso de nack, ou o end ta errado ou o slave
-; nao esta conectado. nao vamos fazer retry,
-; encerramos a comunicacao.
-; STA = 0, SI = 0
-; STO = 1
-	MOV A, SSCON
-	ANL A, #~(STA | SI)	; zera os bits STA e SI
-	ORL A, #STO					; seta STO
-	MOV SSCON, A
-	LJMP end_i2c_int
-;------------------------------------------------------------
-W_DATA_ACK:
-; apos o primeiro data ack (registrador interno)
-; temos 2 opcoes:
-; 1 - escrever um novo byte
-; 2 - gerar um restart para leitura
-	DJNZ B2W, wda1		; enquanto tiver bytes para
-						; escrever, pula para wda1
-
-	; se nao tiver mais bytes para escrever, comece a ler
-	DJNZ B2R, wda2		;se tiver algum byte pra ler,
-						; pula para wd
-	MOV A, SSCON 
-	ANL A, #~(STA | SI)	; senao..
-	ORL A, #STO			; gera um STOP
-	MOV SSCON, A
-	CLR	I2C_BUSY ; zera o flag de ocupado
-	LJMP end_i2c_int
-wda2:
-	MOV A, SSCON 
-	ANL A, #~(STO | SI)
-	ORL A, #STA			; ..gera um restart!
-	MOV SSCON, A
-	LJMP end_i2c_int
-wda1:
-	MOV R0, DBASE
-	MOV SSDAT, @R0	; ...escreve o proximo!
-	MOV A, SSCON
-	ANL A, #~(STA | STO | SI) ; zera STA, STO e SI
-	MOV SSCON, A
-	INC DBASE		; incrementa o indice do buffer
-	LJMP end_i2c_int
-;------------------------------------------------------------
-W_DATA_NACK:
-; apos um data_nack, podemos repetir ou encerrar
-; vamos encerrar
-	MOV A, SSCON 
-	ANL A, #~(STA | SI)
-	ORL A, #STO			; gera um STOP
-	MOV SSCON, A
-	CLR	I2C_BUSY ; zera o flag de ocupado
-	LJMP end_i2c_int	
-;------------------------------------------------------------
-ARB_LOST:
-; apos um arb-lost podemos acabar sendo
-; enderecados como slave
-; o arb-lost costuma ocorrer em 2 situacoes:
-; 1 - problemas fisicos no bus
-; 2 - ambiente multi-master (nao e o caso)
-; em ambos os casos, nao vamos fazer nada!
-; pois nao estamos implementando a comunicacao em modo slave.
-	LJMP end_i2c_int	
-;------------------------------------------------------------
-R_ADDR_ACK:
-; depois de um R ADDR ACK, recebemos os bytes!
-	MOV A, SSCON
-	ANL A, #~(STA | STO | SI) ; receberemos o proximo byte
-	
-	DJNZ B2R, raa1 ; decrementa a quantidade de
-				   ; bytes a receber!
-	; se der 0, e o ultimo byte a ser recebido
-	ANL A, #~AA	; retorne NACK
-	SJMP raa2
-	; se nao...
-raa1:
-	ORL A, #AA	; retorne ACK para o slave!
-raa2:	
-	MOV SSCON, A
-	LJMP end_i2c_int	
-;------------------------------------------------------------
-R_ADDR_NACK:
-; idem ao w_addr_nack
-	MOV A, SSCON 
-	ANL A, #~(STA | SI)
-	ORL A, #STO			; gera um STOP
-	MOV SSCON, A
-	CLR	I2C_BUSY ; zera o flag de ocupado
-	LJMP end_i2c_int	
-;------------------------------------------------------------
-R_DATA_ACK:
-; se tiver mais bytes pra ler, de um ack, senao de um nack
-
-	MOV R0, DBASE
-	MOV	@R0, SSDAT ; le o byte que ja chegou
-
-	MOV A, SSCON
-	ANL A, #~(STA | STO | SI) ; receberemos o proximo byte
-	
-	DJNZ B2R, rda1  ; decrementa a quantidade de 
-					; bytes a receber!
-	; se der 0, e o ultimo byte a ser recebido
-	ANL A, #~AA	; retorne NACK
-	SJMP rda2
-	; se nao...
-rda1:
-	ORL A, #AA	; retorne ACK para o slave!
-rda2:	
-	MOV SSCON, A
-	INC DBASE ; incrementa o buffer
-	LJMP end_i2c_int
-;------------------------------------------------------------
-R_DATA_NACK:
-; salva o ultimo byte e termina
-
-	MOV R0, DBASE
-	MOV	@R0, SSDAT ; le o byte que ja chegou
-
-	MOV A, SSCON 
-	ANL A, #~(STA | SI)
-	ORL A, #STO			; gera um STOP
-	MOV SSCON, A
-
-	INC DBASE ; inc o buffer
-
-	CLR	I2C_BUSY ; zera o flag de ocupado
-	LJMP end_i2c_int	
-
+			ACALL	getTime
+			MOV LCD_POSITION, #80h
+			ACALL printTime
+			MOV LCD_POSITION, #0C0h
+			ACALL printDays
+			CLR TF1
+RET
 
 	hello:	db "Amostragem", 0
 	clear:	db "               ", 0	
+	doispontos:	db ":", 0
+		traco:	db "-", 0
+	smallclear: db " ", 0
+		
+	domingo: db"SUN",0
+	segunda:db "MON",0
+	terca:	 db"TUE",0
+	quarta:	db "WED",0
+	quinta:	db "THU",0
+	sexta:	 db"FRI",0
+	sabado: db "SAT",0
+	alarme: db "Alarme: ",0
 
 END
