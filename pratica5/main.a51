@@ -68,7 +68,7 @@
 	HOU 		EQU 52h
 	DAY 		EQU 53h
 	DAT 		EQU 54h
-	MON			EQU 55h
+	MON		EQU 55h
 	YEA 		EQU 56h
 	CTR 		EQU 57h
 
@@ -79,7 +79,7 @@
 
 	BUZ EQU P2.0        ;<< mudar
 
-	;memoria usada como flag do botao de interrup��o
+	;memoria usada como flag do botao de interrup??o
 	BOT EQU 61h         ;<< mudar
 
 	;funcao de i2c
@@ -101,21 +101,15 @@
 	ORG 2000h
 	LJMP init
 
-	ORG 2023h		;int serial
-	RETI
-
-	ORG 2043h		;iint i2c
-	ACALL int_i2c
-	RETI
-
-	ORG 2010h		; interrupcao do botao
+	ORG 2003h		; interrupcao do botao
 		MOV BOT, #1
-		RETI
+	RETI
 
 		;timer 1
 	ORG 201Bh
 		ACALL int_timer1
 		ACALL checkalarm
+		SETB LED
 	RETI
 
 
@@ -124,10 +118,6 @@
 	ORG 2100h
 	init:
 		ACALL startLCD
-
-		;desabilita interrupcao
-		MOV IEN0, #0x00
-		MOV IEN1, #0x00
 
 		;timer0
 		MOV TMOD, #0x11
@@ -142,6 +132,8 @@
 		;MOV IPH1, #0x02
 		;MOV IEN1, #0x02
 
+		SETB EX0
+		SETB PX0
 		SETB EA
 
 		ACALL initTime
@@ -157,22 +149,26 @@
 		SETB TR1
 
 		;se A pressionado -> setar alarme
-		LCALL returnPressedKey
+		ACALL returnPressedKey
 		CLR TR1
 		MOV A, 2Ah
 		CJNE A, #0Ah, checkb
+		ACALL Delay1sec
+		ACALL Delay1sec
 		ACALL set_alarm_time
+		JMP alarm
 
 		;se B pressionado -> setar horario
 		checkb:
 		CLR TR1
 		MOV A, 2Ah
+		ACALL Delay1sec
+		ACALL Delay1sec
 		CJNE A, #0Bh, alarm
 		ACALL atualiza_hora
 
 		;conferir se precisa ligar alarme
 		alarm:
-
 
 		JMP mainloop
 
@@ -183,252 +179,16 @@
 
 ;----- FUNCOES--------------------------------------------------
 
-;; ;; ;; ;;
-; compara se horario atual �Eigual ao do alarme
-; ser for, pisca buzzer e led em 1 Hz
-; at�Esetar uma memoria atraves da interrupcao do botao
-;; ;; ;; ;;
-checkalarm:
-    MOV A, MIN
-    CLR C
-    SUBB A, AMIN
-    JNZ horario_diferente
-    MOV A, HOU
-    CLR C
-    SUBB A, AHOR
-    JNZ horario_diferente
-    ;se chegou ate aqui eh igual, vamos disparar alarme
-    alarm_on:
-        MOV A, BOT
-        JNZ alarm_off
-        SETB BUZ
-        SETB LED
-        ACALL timerDelay20ms
-        CLR BUZ
-        CLR LED
-        ACALL runT0
-        JMP alarm_on
-
-    alarm_off:
-        CLR BUZ
-        CLR LED
-		MOV BOT , #00h
-    horario_diferente:
-        RET
-
-;; ;; ;; ;;
-;; le hora, minuto, segundo do TECLADO
-;; e salva na memoria
-;; esse �Eo horario que o alarme vai tocar
-;; ;; ;; ;;
-sendStringAlarm:
-	INC LCD_POSITION
-	ADD A, #30h
-	ACALL sendNumber
-	CLR C
-	SUBB A, #30h
-	RET
-
-set_alarm_time:
-    ;pegando dezena da hora
-    MOV LCD_POSITION, #80h
-	MOV DPTR, #alarme
-	ACALL sendString
-
-	MOV LCD_POSITION, #8Ah
-
-	ACALL returnPressedKey
-    MOV A, 2Ah
-	ACALL sendStringAlarm
-    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
-    RL A
-    RL A
-    RL A
-    MOV 2Bh, A          ;conferir se n�o esta em conflito
-    ;pegando unidade
-    ACALL returnPressedKey
-    MOV A, 2Ah
-	ACALL sendStringAlarm
-    ORL A, 2Bh          ;juntando pra formar o numero completo
-    MOV AHOR, A
-
-	INC LCD_POSITION
-	MOV DPTR, #doispontos
-	ACALL sendString
-
-    ;pegando dezena do minuto
-    ACALL returnPressedKey
-    MOV A, 2Ah
-	ACALL sendStringAlarm
-    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
-    RL A
-    RL A
-    RL A
-    MOV 2Bh, A          ;conferir se n�o esta em conflito
-    ;pegando unidade
-    ACALL returnPressedKey
-    MOV A, 2Ah
-	ACALL sendStringAlarm
-    ORL A, 2Bh          ;juntando pra formar o numero completo
-    MOV AMIN, A
-
-    RET
-
-	;; ;; ;; ;;
-	;; le hora, minuto, segundo do TECLADO
-	;; e grava no relogio
-	;; ;;;
-	;; o usuario precisa digitar EM ORDEM:
-	;;  hora, minuto, segundo, dia da semana, dia do mes, mes, ano (dois digitos)
-	;;  incluindo todos os zeros!
-	;; ;; ;; ;;
-	atualiza_hora:
-	    MOV LCD_POSITION, #80h
-	    MOV DPTR, #novahora
-	    ACALL sendString
-	    MOV LCD_POSITION, #8Ah
-	;----------------------
-	    ;pegando dezena da hora
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
-	    RL A
-	    RL A
-	    RL A
-	    MOV 2Bh, A          ;conferir se n�o esta em conflito
-	    ;pegando unidade
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    ORL A, 2Bh          ;juntando pra formar o numero completo
-	    MOV HOU, A
-	;----------------------
-	    MOV LCD_POSITION, #80h
-	    MOV DPTR, #novominuto
-	    ACALL sendString
-	    MOV LCD_POSITION, #8Ah
-	    ;pegando dezena do minuto
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
-	    RL A
-	    RL A
-	    RL A
-	    MOV 2Bh, A          ;conferir se n�o esta em conflito
-	    ;pegando unidade
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    ORL A, 2Bh          ;juntando pra formar o numero completo
-	    MOV MIN, A
-	;----------------------
-	    MOV LCD_POSITION, #80h
-	    MOV DPTR, #novosegundo
-	    ACALL sendString
-	    MOV LCD_POSITION, #8Ah
-	    ;pegando dezena do segundo
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    RL A                   ;;mandar pros mais significativos, o valor final ficara em BCD
-	    RL A
-	    RL A
-	    RL A
-	    MOV 2Bh, A          ;conferir se n�o esta em conflito
-	    ;pegando unidade
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    ORL A, 2Bh          ;juntando pra formar o numero completo
-	    MOV SEC, A
-	;----------------------
-	    MOV LCD_POSITION, #80h
-	    MOV DPTR, #novodiasemana
-	    ACALL sendString
-	    MOV LCD_POSITION, #8Ah
-	    ;;pegar dia da semana
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    RL A                   ;;mandar pros mais significativos, o valor final ficara em BCD
-	    RL A
-	    RL A
-	    RL A
-	    MOV 2Bh, A          ;conferir se n�o esta em conflito
-	        ;pegando unidade
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    ORL A, 2Bh          ;juntando pra formar o numero completo
-	    MOV DAY, A
-	;----------------------
-	    MOV LCD_POSITION, #80h
-	    MOV DPTR, #novodiames
-	    ACALL sendString
-	    MOV LCD_POSITION, #8Ah
-	    ;;pegar dia do mes
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    RL A                   ;;mandar pros mais significativos, o valor final ficara em BCD
-	    RL A
-	    RL A
-	    RL A
-	    MOV 2Bh, A          ;conferir se n�o esta em conflito
-	        ;pegando unidade
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    ORL A, 2Bh          ;juntando pra formar o numero completo
-	    MOV DAT, A
-	;----------------------
-	    MOV LCD_POSITION, #80h
-	    MOV DPTR, #novomes
-	    ACALL sendString
-	    MOV LCD_POSITION, #8Ah
-	    ;;pegar Mes
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    RL A                   ;;mandar pros mais significativos, o valor final ficara em BCD
-	    RL A
-	    RL A
-	    RL A
-	    MOV 2Bh, A          ;conferir se n�o esta em conflito
-	        ;pegando unidade
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    ORL A, 2Bh          ;juntando pra formar o numero completo
-	    MOV MON, A
-	;----------------------
-	    MOV LCD_POSITION, #80h
-	    MOV DPTR, #novoano
-	    ACALL sendString
-	    MOV LCD_POSITION, #8Ah
-	    ;;pegar ano, dois digitos
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    RL A                   ;;mandar pros mais significativos, o valor final ficara em BCD
-	    RL A
-	    RL A
-	    RL A
-	    MOV 2Bh, A          ;conferir se n�o esta em conflito
-	        ;pegando unidade
-	    ACALL returnPressedKey
-	    MOV A, 2Ah
-	    ACALL sendStringAlarm
-	    ORL A, 2Bh          ;juntando pra formar o numero completo
-	    MOV YEA, A
-
-	    ;;enviando para RTC
-	    ACALL setTime
-	    RET
-
 ;--------FUNCAO DELAY ------------------------------------------
+
+	Delay1sec:
+			MOV R6, #0x02		; 4x
+			again:
+			MOV MULT, #0xFA		; 250x
+			ACALL runT0			; 0.5ms
+			DJNZ R6, again		; = 1s
+			RET
+			
 	timerDelay20ms:
 		MOV R6, #200d
 			delay0:
@@ -450,7 +210,7 @@ set_alarm_time:
 
 ;--------FUNCAO LCD --------------------------------------------
 	printTime:
-		MOV R0, #53h			;come�a na proxima posicao
+		MOV R0, #53h			;come?a na proxima posicao
 		MOV R7, #3
 		printTimeLoop:
 			INC LCD_POSITION
@@ -897,6 +657,313 @@ getTime:
 			DJNZ AUX_A, getTimeLoop
 			ACALL stop
 	RET
+	
+
+;; ;; ;; ;;
+; compara se horario atual ?Eigual ao do alarme
+; ser for, pisca buzzer e led em 1 Hz
+; at?Esetar uma memoria atraves da interrupcao do botao
+;; ;; ;; ;;
+checkalarm:
+    MOV A, MIN
+    CLR C
+    SUBB A, AMIN
+    JNZ horario_diferente
+    MOV A, HOU
+    CLR C
+    SUBB A, AHOR
+    JNZ horario_diferente
+    ;se chegou ate aqui eh igual, vamos disparar alarme
+    alarm_on:
+		
+		ACALL getTime
+			MOV LCD_POSITION, #80h
+			MOV DPTR, #clear
+			ACALL sendString
+			MOV LCD_POSITION, #80h			
+			ACALL printTime
+			MOV LCD_POSITION, #0C0h
+			ACALL printDays
+        MOV A, BOT
+        JNZ alarm_off
+        SETB BUZ
+        SETB LED
+        ACALL Delay1sec
+        CLR BUZ
+        CLR LED
+        ACALL runT0
+        JMP alarm_on
+
+    alarm_off:
+        CLR BUZ
+        CLR LED
+		MOV BOT , #00h
+		MOV	ASEC, #00h
+		MOV AMIN, #00h
+		MOV AHOR, #00h
+		CLR IE0
+    horario_diferente:
+        RET
+
+;; ;; ;; ;;
+;; le hora, minuto, segundo do TECLADO
+;; e salva na memoria
+;; esse ?Eo horario que o alarme vai tocar
+;; ;; ;; ;;
+sendStringAlarm:
+	INC LCD_POSITION
+	ADD A, #30h
+	ACALL sendNumber
+	CLR C
+	SUBB A, #30h
+	RET
+
+set_alarm_time:
+	MOV LCD_POSITION, #80h
+	MOV DPTR, #clear
+	ACALL sendString
+	
+	MOV LCD_POSITION, #80h
+	MOV DPTR, #alarme
+	ACALL sendString
+    ;pegando dezena da hora
+
+	MOV LCD_POSITION, #8Ah
+
+	ACALL returnPressedKey
+	ACALL Delay1sec
+    MOV A, 2Ah
+	ACALL sendStringAlarm
+    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
+    RL A
+    RL A
+    RL A
+    MOV 2Bh, A          ;conferir se n?o esta em conflito
+    ;pegando unidade
+    ACALL returnPressedKey
+	ACALL Delay1sec
+    MOV A, 2Ah
+	ACALL sendStringAlarm
+    ORL A, 2Bh          ;juntando pra formar o numero completo
+    MOV AHOR, A
+
+	INC LCD_POSITION
+	MOV DPTR, #doispontos
+	ACALL sendString
+
+    ;pegando dezena do minuto
+    ACALL returnPressedKey
+	ACALL Delay1sec
+    MOV A, 2Ah
+	ACALL sendStringAlarm
+    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
+    RL A
+    RL A
+    RL A
+    MOV 2Bh, A          ;conferir se n?o esta em conflito
+    ;pegando unidade
+    ACALL returnPressedKey
+	ACALL Delay1sec
+    MOV A, 2Ah
+	ACALL sendStringAlarm
+    ORL A, 2Bh          ;juntando pra formar o numero completo
+    MOV AMIN, A
+
+    RET
+
+	;; ;; ;; ;;
+	;; le hora, minuto, segundo do TECLADO
+	;; e grava no relogio
+	;; ;;;
+	;; o usuario precisa digitar EM ORDEM:
+	;;  hora, minuto, segundo, dia da semana, dia do mes, mes, ano (dois digitos)
+	;;  incluindo todos os zeros!
+	;; ;; ;; ;;
+	atualiza_hora:
+		MOV LCD_POSITION, #80h
+		MOV DPTR, #clear
+		ACALL sendString
+		
+	    MOV LCD_POSITION, #80h
+	    MOV DPTR, #novahora
+	    ACALL sendString
+	    MOV LCD_POSITION, #8Ah
+	;----------------------
+
+	    ;pegando dezena da hora
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
+	    RL A
+	    RL A
+	    RL A
+	    MOV 2Bh, A          ;conferir se n?o esta em conflito
+	    ;pegando unidade
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    ORL A, 2Bh          ;juntando pra formar o numero completo
+	    MOV HOU, A
+		ACALL Delay1sec
+
+	;----------------------
+		MOV LCD_POSITION, #80h
+		MOV DPTR, #clear
+		ACALL sendString
+	    MOV LCD_POSITION, #80h
+	    MOV DPTR, #novominuto
+	    ACALL sendString
+	    MOV LCD_POSITION, #8Ah
+	    ;pegando dezena do minuto
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    RL A                  ;;mandar pros mais significativos, o valor final ficara em BCD
+	    RL A
+	    RL A
+	    RL A
+	    MOV 2Bh, A          ;conferir se n?o esta em conflito
+	    ;pegando unidade
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    ORL A, 2Bh          ;juntando pra formar o numero completo
+	    MOV MIN, A
+		ACALL Delay1sec
+
+	;----------------------
+		MOV LCD_POSITION, #80h
+		MOV DPTR, #clear
+		ACALL sendString
+	    MOV LCD_POSITION, #80h
+	    MOV DPTR, #novosegundo
+	    ACALL sendString
+	    MOV LCD_POSITION, #8Ah
+	    ;pegando dezena do segundo
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    RL A                   ;;mandar pros mais significativos, o valor final ficara em BCD
+	    RL A
+	    RL A
+	    RL A
+	    MOV 2Bh, A          ;conferir se n?o esta em conflito
+	    ;pegando unidade
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    ORL A, 2Bh          ;juntando pra formar o numero completo
+	    MOV SEC, A
+		ACALL Delay1sec
+
+	;----------------------
+		MOV LCD_POSITION, #80h
+		MOV DPTR, #clear
+		ACALL sendString
+	    MOV LCD_POSITION, #80h
+	    MOV DPTR, #novodiasemana
+	    ACALL sendString
+	    MOV LCD_POSITION, #8Ah
+	    ;;pegar dia da semana
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    MOV DAY, 2Ah
+		ACALL Delay1sec
+
+
+	;----------------------
+		MOV LCD_POSITION, #80h
+		MOV DPTR, #clear
+		ACALL sendString
+	    MOV LCD_POSITION, #80h
+	    MOV DPTR, #novodiames
+	    ACALL sendString
+	    MOV LCD_POSITION, #8Ah
+	    ;;pegar dia do mes
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    RL A                   ;;mandar pros mais significativos, o valor final ficara em BCD
+	    RL A
+	    RL A
+	    RL A
+	    MOV 2Bh, A          ;conferir se n?o esta em conflito
+	        ;pegando unidade
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    ORL A, 2Bh          ;juntando pra formar o numero completo
+	    MOV DAT, A
+		ACALL Delay1sec
+
+	;----------------------
+		MOV LCD_POSITION, #80h
+		MOV DPTR, #clear
+		ACALL sendString
+	    MOV LCD_POSITION, #80h
+	    MOV DPTR, #novomes
+	    ACALL sendString
+	    MOV LCD_POSITION, #8Ah
+	    ;;pegar Mes
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    RL A                   ;;mandar pros mais significativos, o valor final ficara em BCD
+	    RL A
+	    RL A
+	    RL A
+	    MOV 2Bh, A          ;conferir se n?o esta em conflito
+	        ;pegando unidade
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    ORL A, 2Bh          ;juntando pra formar o numero completo
+	    MOV MON, A
+		ACALL Delay1sec
+
+	;----------------------
+		MOV LCD_POSITION, #80h
+		MOV DPTR, #clear
+		ACALL sendString
+	    MOV LCD_POSITION, #80h
+	    MOV DPTR, #novoano
+	    ACALL sendString
+	    MOV LCD_POSITION, #8Ah
+	    ;;pegar ano, dois digitos
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    RL A                   ;;mandar pros mais significativos, o valor final ficara em BCD
+	    RL A
+	    RL A
+	    RL A
+	    MOV 2Bh, A          ;conferir se n?o esta em conflito
+	        ;pegando unidade
+	    ACALL returnPressedKey
+		ACALL Delay1sec
+	    MOV A, 2Ah
+	    ACALL sendStringAlarm
+	    ORL A, 2Bh          ;juntando pra formar o numero completo
+	    MOV YEA, A
+		ACALL Delay1sec
+
+	    ;;enviando para RTC
+	    ACALL setTime
+	    RET
 ;----- FUNCOES FIM ----------------------------------------------
 
 ;----- Interrupcoes INICIO ----------------------------------------------
@@ -906,26 +973,24 @@ RET
 int_timer1:
 			;escreve hora atual no LCD
 			;CPL LED1			; toggle no led
-			MOV R6, #0x03		; 4x
-				again:
-				MOV MULT, #0xFA		; 250x
-				ACALL runT0			; 0.5ms
-				DJNZ R6, again		; = 1s
-
+			ACALL Delay1sec
+		
 			ACALL	getTime
 			MOV LCD_POSITION, #80h
+			MOV DPTR, #clear
+			ACALL sendString
+			MOV LCD_POSITION, #80h			
 			ACALL printTime
 			MOV LCD_POSITION, #0C0h
 			ACALL printDays
 			CLR TF1
 RET
 
-	hello:	db "Amostragem", 0
-	clear:	db "               ", 0
+	clear:	db "                       ", 0
 	doispontos:	db ":", 0
 		traco:	db "-", 0
-	smallclear: db " ", 0
-
+		smallclear: db " ", 0
+		
 	domingo: db"SUN",0
 	segunda:db "MON",0
 	terca:	 db"TUE",0
@@ -934,6 +999,7 @@ RET
 	sexta:	 db"FRI",0
 	sabado: db "SAT",0
 	alarme: db "Alarme: ",0
+	alarme1: db "Alarme11: ",0
 
 	novahora:      db "Horas:  ",0
 	novominuto:    db "Minuto: ",0
@@ -945,3 +1011,4 @@ RET
 
 
 END
+
