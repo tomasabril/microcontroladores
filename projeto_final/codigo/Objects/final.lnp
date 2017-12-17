@@ -1,0 +1,10 @@
+".\Objects\STARTUP.obj",
+".\Objects\main.obj",
+".\Objects\LCD.obj",
+".\Objects\interrupt.obj",
+".\Objects\rtc.obj",
+".\Objects\keypad.obj",
+".\Objects\delay.obj" 
+TO ".\Objects\final" 
+PRINT(".\Listings\final.m51") RAMSIZE(256) 
+CODE( 0x0000-0x3FFF, ?PR?MAIN?*(0x2800) )

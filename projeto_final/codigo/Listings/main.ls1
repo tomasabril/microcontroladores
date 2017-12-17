@@ -1,0 +1,610 @@
+A51 MACRO ASSEMBLER  MAIN                                                                 11/17/2017 18:01:22 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.2.5.0
+NO OBJECT MODULE REQUESTED
+ASSEMBLER INVOKED BY: D:\Program Files\Keil\C51\BIN\A51.EXE .\Objects\main.src PR(.\Listings\main.ls1) EP DEBUG
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     ; .\Objects\main.SRC generated from: main.c
+
+                       2     ; COMPILER INVOKED BY:
+
+                       3     ;        D:\Program Files\Keil\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INTVECTOR(0X
+                             2000) DEBUG OBJECTEXTEND PRINT(.\Listings\main.lst) TABS(8) SRC(.\Objects\main.SRC)
+
+                       4     
+
+                       5     $nomod51 
+
+                       6     
+
+                       7     NAME    MAIN
+
+                       8     
+
+  0096                 9     SSADR   DATA    096H
+
+  00DA                10     CCF2    BIT     0D8H.2
+
+  00DB                11     CCF3    BIT     0D8H.3
+
+  0080                12     P0      DATA    080H
+
+  00D6                13     UDPADDL DATA    0D6H
+
+  0095                14     SSDAT   DATA    095H
+
+  00DC                15     CCF4    BIT     0D8H.4
+
+  0090                16     P1      DATA    090H
+
+  00A0                17     P2      DATA    0A0H
+
+  00B0                18     P3      DATA    0B0H
+
+  00C0                19     P4      DATA    0C0H
+
+  00C3                20     SPCON   DATA    0C3H
+
+  00AF                21     EA      BIT     0A8H.7
+
+  00C6                22     USBADDR DATA    0C6H
+
+  0093                23     SSCON   DATA    093H
+
+  00AE                24     EC      BIT     0A8H.6
+
+  00DF                25     CF      BIT     0D8H.7
+
+  00F9                26     CH      DATA    0F9H
+
+  00C4                27     SPSTA   DATA    0C4H
+
+  00A8                28     IEN0    DATA    0A8H
+
+  00B1                29     IEN1    DATA    0B1H
+
+  00E9                30     CL      DATA    0E9H
+
+  0080                31     P0_0    BIT     080H.0
+
+  00FA                32     CCAP0H  DATA    0FAH
+
+  0090                33     P1_0    BIT     090H.0
+
+  0081                34     P0_1    BIT     080H.1
+
+  00B7                35     IPH0    DATA    0B7H
+
+  00FB                36     CCAP1H  DATA    0FBH
+
+  00A0                37     P2_0    BIT     0A0H.0
+
+  0091                38     P1_1    BIT     090H.1
+
+  0082                39     P0_2    BIT     080H.2
+
+  00B3                40     IPH1    DATA    0B3H
+
+  00FC                41     CCAP2H  DATA    0FCH
+
+  00B0                42     P3_0    BIT     0B0H.0
+
+  00A1                43     P2_1    BIT     0A0H.1
+
+  0092                44     P1_2    BIT     090H.2
+
+  0083                45     P0_3    BIT     080H.3
+
+  00FD                46     CCAP3H  DATA    0FDH
+
+  00C0                47     P4_0    BIT     0C0H.0
+
+  00B1                48     P3_1    BIT     0B0H.1
+
+  00A2                49     P2_2    BIT     0A0H.2
+
+  0093                50     P1_3    BIT     090H.3
+
+  0084                51     P0_4    BIT     080H.4
+
+  00DE                52     CR      BIT     0D8H.6
+
+  00EA                53     CCAP0L  DATA    0EAH
+
+  00FE                54     CCAP4H  DATA    0FEH
+
+  00C1                55     P4_1    BIT     0C0H.1
+
+  00B2                56     P3_2    BIT     0B0H.2
+
+  00A3                57     P2_3    BIT     0A0H.3
+
+A51 MACRO ASSEMBLER  MAIN                                                                 11/17/2017 18:01:22 PAGE     2
+
+  0094                58     P1_4    BIT     090H.4
+
+  0085                59     P0_5    BIT     080H.5
+
+  00B8                60     IPL0    DATA    0B8H
+
+  00EB                61     CCAP1L  DATA    0EBH
+
+  00DA                62     CCAPM0  DATA    0DAH
+
+  00CE                63     EXF2    BIT     0C8H.6
+
+  00B3                64     P3_3    BIT     0B0H.3
+
+  00A4                65     P2_4    BIT     0A0H.4
+
+  0095                66     P1_5    BIT     090H.5
+
+  0086                67     P0_6    BIT     080H.6
+
+  00B2                68     IPL1    DATA    0B2H
+
+  00EC                69     CCAP2L  DATA    0ECH
+
+  00DB                70     CCAPM1  DATA    0DBH
+
+  00B4                71     P3_4    BIT     0B0H.4
+
+  00A5                72     P2_5    BIT     0A0H.5
+
+  0096                73     P1_6    BIT     090H.6
+
+  0087                74     P0_7    BIT     080H.7
+
+  00AC                75     ES      BIT     0A8H.4
+
+  00ED                76     CCAP3L  DATA    0EDH
+
+  00DC                77     CCAPM2  DATA    0DCH
+
+  00B5                78     P3_5    BIT     0B0H.5
+
+  00A6                79     P2_6    BIT     0A0H.6
+
+  0097                80     P1_7    BIT     090H.7
+
+  00EE                81     CCAP4L  DATA    0EEH
+
+  00DD                82     CCAPM3  DATA    0DDH
+
+  00B6                83     P3_6    BIT     0B0H.6
+
+  00A7                84     P2_7    BIT     0A0H.7
+
+  00DE                85     CCAPM4  DATA    0DEH
+
+  00B7                86     P3_7    BIT     0B0H.7
+
+  0098                87     RI      BIT     098H.0
+
+  0099                88     TI      BIT     098H.1
+
+  00CF                89     UEPDATX DATA    0CFH
+
+  0089                90     IE0_    BIT     088H.1
+
+  008B                91     IE1_    BIT     088H.3
+
+  008F                92     CKCON0  DATA    08FH
+
+  00AF                93     CKCON1  DATA    0AFH
+
+  00B9                94     PT0L    BIT     0B8H.1
+
+  00CB                95     RCAP2H  DATA    0CBH
+
+  00BD                96     PT2L    BIT     0B8H.5
+
+  0081                97     SP      DATA    081H
+
+  00D9                98     CMOD    DATA    0D9H
+
+  00D8                99     CCON    DATA    0D8H
+
+  00D4               100     UEPCONX DATA    0D4H
+
+  00B8               101     PX0L    BIT     0B8H.0
+
+  00CA               102     RCAP2L  DATA    0CAH
+
+  00D1               103     FCON    DATA    0D1H
+
+  00C9               104     C_T2    BIT     0C8H.1
+
+  00E3               105     UBYCTHX DATA    0E3H
+
+  00CE               106     UEPSTAX DATA    0CEH
+
+  009C               107     KBLS    DATA    09CH
+
+  00CD               108     RCLK    BIT     0C8H.5
+
+  00E2               109     UBYCTLX DATA    0E2H
+
+  00CC               110     TCLK    BIT     0C8H.4
+
+  00BE               111     PPCL    BIT     0B8H.6
+
+  0087               112     PCON    DATA    087H
+
+  0099               113     SBUF    DATA    099H
+
+  00F8               114     EP0INT  BIT     0F8H.0
+
+  00F9               115     EP1INT  BIT     0F8H.1
+
+  00FA               116     EP2INT  BIT     0F8H.2
+
+  0098               117     SCON    DATA    098H
+
+  00FB               118     EP3INT  BIT     0F8H.3
+
+  0089               119     TMOD    DATA    089H
+
+  0088               120     TCON    DATA    088H
+
+  00FC               121     EP4INT  BIT     0F8H.4
+
+  00F1               122     LEDCON  DATA    0F1H
+
+  00FD               123     EP5INT  BIT     0F8H.5
+
+A51 MACRO ASSEMBLER  MAIN                                                                 11/17/2017 18:01:22 PAGE     3
+
+  00FE               124     EP6INT  BIT     0F8H.6
+
+  00BB               125     PTIL    BIT     0B8H.3
+
+  009B               126     BDRCON  DATA    09BH
+
+                     127     DPTR    DATA    082H
+
+*** _________________________^
+*** ERROR #A9 IN 127 (.\Objects\main.src, LINE 127): SYNTAX ERROR
+  009F               128     FE_SM0  BIT     098H.7
+
+  0094               129     SSCS    DATA    094H
+
+  00BA               130     PXIL    BIT     0B8H.2
+
+  008E               131     AUXR    DATA    08EH
+
+  00F0               132     B       DATA    0F0H
+
+  00C8               133     CP_RL2  BIT     0C8H.0
+
+  00E0               134     ACC     DATA    0E0H
+
+  00C2               135     UEPIEN  DATA    0C2H
+
+  00BE               136     USBIEN  DATA    0BEH
+
+  00A9               137     ET0     BIT     0A8H.1
+
+  00A3               138     PLLCON  DATA    0A3H
+
+  00AB               139     ET1     BIT     0A8H.3
+
+  008D               140     TF0     BIT     088H.5
+
+  00AD               141     ET2     BIT     0A8H.5
+
+  008F               142     TF1     BIT     088H.7
+
+  00BC               143     USBCON  DATA    0BCH
+
+  009A               144     RB8     BIT     098H.2
+
+  00CF               145     TF2     BIT     0C8H.7
+
+  008C               146     TH0     DATA    08CH
+
+  00A4               147     PLLDIV  DATA    0A4H
+
+  00A8               148     EX0     BIT     0A8H.0
+
+  0088               149     IT0     BIT     088H.0
+
+  008D               150     TH1     DATA    08DH
+
+  00AA               151     EX1     BIT     0A8H.2
+
+  009B               152     TB8     BIT     098H.3
+
+  008A               153     IT1     BIT     088H.2
+
+  00CD               154     TH2     DATA    0CDH
+
+  008A               155     TL0     DATA    08AH
+
+  009E               156     SM1     BIT     098H.6
+
+  008B               157     TL1     DATA    08BH
+
+  009D               158     KBE     DATA    09DH
+
+  009D               159     SM2     BIT     098H.5
+
+  00CC               160     TL2     DATA    0CCH
+
+  009E               161     KBF     DATA    09EH
+
+  00BB               162     UFNUMH  DATA    0BBH
+
+  008C               163     TR0     BIT     088H.4
+
+  00F8               164     UEPINT  DATA    0F8H
+
+  00BD               165     USBINT  DATA    0BDH
+
+  008E               166     TR1     BIT     088H.6
+
+  00CA               167     TR2     BIT     0C8H.2
+
+  00BA               168     UFNUML  DATA    0BAH
+
+  00A7               169     WDTPRG  DATA    0A7H
+
+  00C7               170     UEPNUM  DATA    0C7H
+
+  0083               171     DPH     DATA    083H
+
+  009A               172     BRL     DATA    09AH
+
+  0082               173     DPL     DATA    082H
+
+  00CB               174     EXEN2   BIT     0C8H.3
+
+  00D5               175     UEPRST  DATA    0D5H
+
+  009C               176     REN     BIT     098H.4
+
+  00C9               177     T2MOD   DATA    0C9H
+
+  00C8               178     T2CON   DATA    0C8H
+
+  00A6               179     WDTRST  DATA    0A6H
+
+  00D2               180     EECON   DATA    0D2H
+
+  00B9               181     SADEN   DATA    0B9H
+
+  00BC               182     PSL     BIT     0B8H.4
+
+  00A9               183     SADDR   DATA    0A9H
+
+  00A2               184     AUXR1   DATA    0A2H
+
+  0085               185     CKSEL   DATA    085H
+
+  00D0               186     PSW     DATA    0D0H
+
+  00D7               187     UDPADDH DATA    0D7H
+
+A51 MACRO ASSEMBLER  MAIN                                                                 11/17/2017 18:01:22 PAGE     4
+
+  00D8               188     CCF0    BIT     0D8H.0
+
+  00C5               189     SPDAT   DATA    0C5H
+
+  00D9               190     CCF1    BIT     0D8H.1
+
+                     191     ; #include <at89c5131.h>
+
+                     192     ; #include <lcd.h>
+
+                     193     ; 
+
+                     194     ; *** sync lost ***
+
+                     195     ; *** sync lost ***
+
+                     196             END
+
+A51 MACRO ASSEMBLER  MAIN                                                                 11/17/2017 18:01:22 PAGE     5
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . .  D ADDR   00E0H   A   
+AUXR . . . . . . .  D ADDR   008EH   A   
+AUXR1. . . . . . .  D ADDR   00A2H   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+BDRCON . . . . . .  D ADDR   009BH   A   
+BRL. . . . . . . .  D ADDR   009AH   A   
+CCAP0H . . . . . .  D ADDR   00FAH   A   
+CCAP0L . . . . . .  D ADDR   00EAH   A   
+CCAP1H . . . . . .  D ADDR   00FBH   A   
+CCAP1L . . . . . .  D ADDR   00EBH   A   
+CCAP2H . . . . . .  D ADDR   00FCH   A   
+CCAP2L . . . . . .  D ADDR   00ECH   A   
+CCAP3H . . . . . .  D ADDR   00FDH   A   
+CCAP3L . . . . . .  D ADDR   00EDH   A   
+CCAP4H . . . . . .  D ADDR   00FEH   A   
+CCAP4L . . . . . .  D ADDR   00EEH   A   
+CCAPM0 . . . . . .  D ADDR   00DAH   A   
+CCAPM1 . . . . . .  D ADDR   00DBH   A   
+CCAPM2 . . . . . .  D ADDR   00DCH   A   
+CCAPM3 . . . . . .  D ADDR   00DDH   A   
+CCAPM4 . . . . . .  D ADDR   00DEH   A   
+CCF0 . . . . . . .  B ADDR   00D8H.0 A   
+CCF1 . . . . . . .  B ADDR   00D8H.1 A   
+CCF2 . . . . . . .  B ADDR   00D8H.2 A   
+CCF3 . . . . . . .  B ADDR   00D8H.3 A   
+CCF4 . . . . . . .  B ADDR   00D8H.4 A   
+CCON . . . . . . .  D ADDR   00D8H   A   
+CF . . . . . . . .  B ADDR   00D8H.7 A   
+CH . . . . . . . .  D ADDR   00F9H   A   
+CKCON0 . . . . . .  D ADDR   008FH   A   
+CKCON1 . . . . . .  D ADDR   00AFH   A   
+CKSEL. . . . . . .  D ADDR   0085H   A   
+CL . . . . . . . .  D ADDR   00E9H   A   
+CMOD . . . . . . .  D ADDR   00D9H   A   
+CP_RL2 . . . . . .  B ADDR   00C8H.0 A   
+CR . . . . . . . .  B ADDR   00D8H.6 A   
+C_T2 . . . . . . .  B ADDR   00C8H.1 A   
+DPH. . . . . . . .  D ADDR   0083H   A   
+DPL. . . . . . . .  D ADDR   0082H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+EC . . . . . . . .  B ADDR   00A8H.6 A   
+EECON. . . . . . .  D ADDR   00D2H   A   
+EP0INT . . . . . .  B ADDR   00F8H.0 A   
+EP1INT . . . . . .  B ADDR   00F8H.1 A   
+EP2INT . . . . . .  B ADDR   00F8H.2 A   
+EP3INT . . . . . .  B ADDR   00F8H.3 A   
+EP4INT . . . . . .  B ADDR   00F8H.4 A   
+EP5INT . . . . . .  B ADDR   00F8H.5 A   
+EP6INT . . . . . .  B ADDR   00F8H.6 A   
+ES . . . . . . . .  B ADDR   00A8H.4 A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+ET1. . . . . . . .  B ADDR   00A8H.3 A   
+ET2. . . . . . . .  B ADDR   00A8H.5 A   
+EX0. . . . . . . .  B ADDR   00A8H.0 A   
+EX1. . . . . . . .  B ADDR   00A8H.2 A   
+EXEN2. . . . . . .  B ADDR   00C8H.3 A   
+EXF2 . . . . . . .  B ADDR   00C8H.6 A   
+FCON . . . . . . .  D ADDR   00D1H   A   
+FE_SM0 . . . . . .  B ADDR   0098H.7 A   
+IE0_ . . . . . . .  B ADDR   0088H.1 A   
+A51 MACRO ASSEMBLER  MAIN                                                                 11/17/2017 18:01:22 PAGE     6
+
+IE1_ . . . . . . .  B ADDR   0088H.3 A   
+IEN0 . . . . . . .  D ADDR   00A8H   A   
+IEN1 . . . . . . .  D ADDR   00B1H   A   
+IPH0 . . . . . . .  D ADDR   00B7H   A   
+IPH1 . . . . . . .  D ADDR   00B3H   A   
+IPL0 . . . . . . .  D ADDR   00B8H   A   
+IPL1 . . . . . . .  D ADDR   00B2H   A   
+IT0. . . . . . . .  B ADDR   0088H.0 A   
+IT1. . . . . . . .  B ADDR   0088H.2 A   
+KBE. . . . . . . .  D ADDR   009DH   A   
+KBF. . . . . . . .  D ADDR   009EH   A   
+KBLS . . . . . . .  D ADDR   009CH   A   
+LEDCON . . . . . .  D ADDR   00F1H   A   
+MAIN . . . . . . .  N NUMB   -----       
+P0 . . . . . . . .  D ADDR   0080H   A   
+P0_0 . . . . . . .  B ADDR   0080H.0 A   
+P0_1 . . . . . . .  B ADDR   0080H.1 A   
+P0_2 . . . . . . .  B ADDR   0080H.2 A   
+P0_3 . . . . . . .  B ADDR   0080H.3 A   
+P0_4 . . . . . . .  B ADDR   0080H.4 A   
+P0_5 . . . . . . .  B ADDR   0080H.5 A   
+P0_6 . . . . . . .  B ADDR   0080H.6 A   
+P0_7 . . . . . . .  B ADDR   0080H.7 A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+P1_0 . . . . . . .  B ADDR   0090H.0 A   
+P1_1 . . . . . . .  B ADDR   0090H.1 A   
+P1_2 . . . . . . .  B ADDR   0090H.2 A   
+P1_3 . . . . . . .  B ADDR   0090H.3 A   
+P1_4 . . . . . . .  B ADDR   0090H.4 A   
+P1_5 . . . . . . .  B ADDR   0090H.5 A   
+P1_6 . . . . . . .  B ADDR   0090H.6 A   
+P1_7 . . . . . . .  B ADDR   0090H.7 A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+P2_0 . . . . . . .  B ADDR   00A0H.0 A   
+P2_1 . . . . . . .  B ADDR   00A0H.1 A   
+P2_2 . . . . . . .  B ADDR   00A0H.2 A   
+P2_3 . . . . . . .  B ADDR   00A0H.3 A   
+P2_4 . . . . . . .  B ADDR   00A0H.4 A   
+P2_5 . . . . . . .  B ADDR   00A0H.5 A   
+P2_6 . . . . . . .  B ADDR   00A0H.6 A   
+P2_7 . . . . . . .  B ADDR   00A0H.7 A   
+P3 . . . . . . . .  D ADDR   00B0H   A   
+P3_0 . . . . . . .  B ADDR   00B0H.0 A   
+P3_1 . . . . . . .  B ADDR   00B0H.1 A   
+P3_2 . . . . . . .  B ADDR   00B0H.2 A   
+P3_3 . . . . . . .  B ADDR   00B0H.3 A   
+P3_4 . . . . . . .  B ADDR   00B0H.4 A   
+P3_5 . . . . . . .  B ADDR   00B0H.5 A   
+P3_6 . . . . . . .  B ADDR   00B0H.6 A   
+P3_7 . . . . . . .  B ADDR   00B0H.7 A   
+P4 . . . . . . . .  D ADDR   00C0H   A   
+P4_0 . . . . . . .  B ADDR   00C0H.0 A   
+P4_1 . . . . . . .  B ADDR   00C0H.1 A   
+PCON . . . . . . .  D ADDR   0087H   A   
+PLLCON . . . . . .  D ADDR   00A3H   A   
+PLLDIV . . . . . .  D ADDR   00A4H   A   
+PPCL . . . . . . .  B ADDR   00B8H.6 A   
+PSL. . . . . . . .  B ADDR   00B8H.4 A   
+PSW. . . . . . . .  D ADDR   00D0H   A   
+PT0L . . . . . . .  B ADDR   00B8H.1 A   
+PT2L . . . . . . .  B ADDR   00B8H.5 A   
+PTIL . . . . . . .  B ADDR   00B8H.3 A   
+PX0L . . . . . . .  B ADDR   00B8H.0 A   
+PXIL . . . . . . .  B ADDR   00B8H.2 A   
+RB8. . . . . . . .  B ADDR   0098H.2 A   
+RCAP2H . . . . . .  D ADDR   00CBH   A   
+A51 MACRO ASSEMBLER  MAIN                                                                 11/17/2017 18:01:22 PAGE     7
+
+RCAP2L . . . . . .  D ADDR   00CAH   A   
+RCLK . . . . . . .  B ADDR   00C8H.5 A   
+REN. . . . . . . .  B ADDR   0098H.4 A   
+RI . . . . . . . .  B ADDR   0098H.0 A   
+SADDR. . . . . . .  D ADDR   00A9H   A   
+SADEN. . . . . . .  D ADDR   00B9H   A   
+SBUF . . . . . . .  D ADDR   0099H   A   
+SCON . . . . . . .  D ADDR   0098H   A   
+SM1. . . . . . . .  B ADDR   0098H.6 A   
+SM2. . . . . . . .  B ADDR   0098H.5 A   
+SP . . . . . . . .  D ADDR   0081H   A   
+SPCON. . . . . . .  D ADDR   00C3H   A   
+SPDAT. . . . . . .  D ADDR   00C5H   A   
+SPSTA. . . . . . .  D ADDR   00C4H   A   
+SSADR. . . . . . .  D ADDR   0096H   A   
+SSCON. . . . . . .  D ADDR   0093H   A   
+SSCS . . . . . . .  D ADDR   0094H   A   
+SSDAT. . . . . . .  D ADDR   0095H   A   
+T2CON. . . . . . .  D ADDR   00C8H   A   
+T2MOD. . . . . . .  D ADDR   00C9H   A   
+TB8. . . . . . . .  B ADDR   0098H.3 A   
+TCLK . . . . . . .  B ADDR   00C8H.4 A   
+TCON . . . . . . .  D ADDR   0088H   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TF1. . . . . . . .  B ADDR   0088H.7 A   
+TF2. . . . . . . .  B ADDR   00C8H.7 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TH1. . . . . . . .  D ADDR   008DH   A   
+TH2. . . . . . . .  D ADDR   00CDH   A   
+TI . . . . . . . .  B ADDR   0098H.1 A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TL1. . . . . . . .  D ADDR   008BH   A   
+TL2. . . . . . . .  D ADDR   00CCH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TR1. . . . . . . .  B ADDR   0088H.6 A   
+TR2. . . . . . . .  B ADDR   00C8H.2 A   
+UBYCTHX. . . . . .  D ADDR   00E3H   A   
+UBYCTLX. . . . . .  D ADDR   00E2H   A   
+UDPADDH. . . . . .  D ADDR   00D7H   A   
+UDPADDL. . . . . .  D ADDR   00D6H   A   
+UEPCONX. . . . . .  D ADDR   00D4H   A   
+UEPDATX. . . . . .  D ADDR   00CFH   A   
+UEPIEN . . . . . .  D ADDR   00C2H   A   
+UEPINT . . . . . .  D ADDR   00F8H   A   
+UEPNUM . . . . . .  D ADDR   00C7H   A   
+UEPRST . . . . . .  D ADDR   00D5H   A   
+UEPSTAX. . . . . .  D ADDR   00CEH   A   
+UFNUMH . . . . . .  D ADDR   00BBH   A   
+UFNUML . . . . . .  D ADDR   00BAH   A   
+USBADDR. . . . . .  D ADDR   00C6H   A   
+USBCON . . . . . .  D ADDR   00BCH   A   
+USBIEN . . . . . .  D ADDR   00BEH   A   
+USBINT . . . . . .  D ADDR   00BDH   A   
+WDTPRG . . . . . .  D ADDR   00A7H   A   
+WDTRST . . . . . .  D ADDR   00A6H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 1 ERROR(S)

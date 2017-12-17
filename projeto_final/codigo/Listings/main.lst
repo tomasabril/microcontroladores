@@ -1,0 +1,311 @@
+C51 COMPILER V9.56.0.0   MAIN                                                              12/07/2017 18:29:48 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Program Files\Keil\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE PRINT(.\Listings\main.lst) TA
+                    -BS(6) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "LCD.h"
+   2          #include "interrupt.h"
+   3          #include "rtc.h"
+   4          #include "keypad.h"
+   5          #include "delay.h"                                                                                        
+             -                                                                                                                        
+             -                                          
+   6          #include <at89c5131.h> //adicionar nos demais headers se nao funcionar
+   7          
+   8          #define PERIMETRO 2
+   9          
+  10          bit inRun = 0;
+  11          
+  12          unsigned char tecla = '0';
+  13          unsigned char a[7]; // valores do RTC em 
+  14          unsigned char texto[16] = "________________"; //texto para imprimir
+  15          unsigned char dist[16] = "________________"; //texto para imprimir
+  16          unsigned char dist_final[8] = "00,00km";
+  17          
+  18          unsigned char seg = 0;
+  19          unsigned char seg_final = 0;
+  20          unsigned char min = 0;
+  21          unsigned char min_final = 0;
+  22          unsigned char hor = 0;
+  23          unsigned char hor_final = 0;
+  24          
+  25          unsigned long int loops = 0;
+  26          unsigned long int distancia = 0;
+  27          unsigned long int distancia_ant = 0;
+  28          
+  29          unsigned int i=0;
+  30          unsigned char resultado[2];
+  31          
+  32          
+  33          void intToChar(int num){
+  34   1            int dezena;
+  35   1            int unidade;
+  36   1      
+  37   1            dezena = num/10;
+  38   1            unidade = num%10;
+  39   1            
+  40   1            resultado[0] = 0x30 + dezena;
+  41   1            resultado[1] = 0x30 + unidade;
+  42   1      }
+  43          
+  44          void cleartexto(){
+  45   1            i =0;
+  46   1            while(i<16){
+  47   2                  texto[i] = '_';
+  48   2                  i++;
+  49   2            }
+  50   1      }
+  51          
+  52          int Dec_To_BCD(int dec) { return ((dec / 10 * 16) + (dec % 10)); }
+C51 COMPILER V9.56.0.0   MAIN                                                              12/07/2017 18:29:48 PAGE 2   
+
+  53          
+  54          int BCD_To_Dec(int val) { return ( (val/16*10) + (val%16) );    }
+  55          
+  56          void readAllReg() {
+  57   1            unsigned char j = 0;
+  58   1        I2CStart();
+  59   1        I2CSend(0xD0);
+  60   1        I2CSend(0x00);
+  61   1        I2CStop();
+  62   1        I2CStart();
+  63   1        I2CSend(0xD1);
+  64   1            
+  65   1        for (j = 0; j < 8; j++) {
+  66   2          a[j] = I2CRead();
+  67   2          if (j == 7)
+  68   2            I2CNak();
+  69   2          else
+  70   2            I2CAck();
+  71   2        }
+  72   1        I2CStop();
+  73   1      }
+  74          
+  75          void setTime(int Sec, int Min, int Hour, int Dow, int Dom, int Month,
+  76                       int Year) {
+  77   1        I2CStart();
+  78   1        I2CSend(0xD0);
+  79   1        I2CSend(0x00);
+  80   1        I2CSend(Dec_To_BCD(Sec) & 0x7f);
+  81   1        I2CSend(Dec_To_BCD(Min) & 0x7f);
+  82   1        I2CSend(Dec_To_BCD(Hour) & 0x3f);
+  83   1        I2CSend(Dec_To_BCD(Dow) & 0x07);
+  84   1        I2CSend(Dec_To_BCD(Dom) & 0x3f);
+  85   1        I2CSend(Dec_To_BCD(Month) & 0x1f);
+  86   1        I2CSend(Dec_To_BCD(Year) & 0xff);
+  87   1        I2CStop();
+  88   1      }
+  89                                               
+  90          void initRtcSqrt(){
+  91   1            I2CStart();
+  92   1            I2CSend(0xD0);    //slave address
+  93   1            I2CSend(0x07);    //control register address
+  94   1            I2CSend(0x10);    //control register 1
+  95   1            I2CStop();
+  96   1            
+  97   1      }
+  98          
+  99          void writeTime(){
+ 100   1            seg = BCD_To_Dec(a[0]);
+ 101   1            min = BCD_To_Dec(a[1]);
+ 102   1            hor = BCD_To_Dec(a[2]);
+ 103   1      
+ 104   1            cleartexto();
+ 105   1      
+ 106   1            intToChar(hor);
+ 107   1            texto[0] = resultado[0];
+ 108   1            texto[1] = resultado[1];
+ 109   1            texto[2] = ':';
+ 110   1            
+ 111   1            intToChar(min);
+ 112   1            texto[3] = resultado[0];
+ 113   1            texto[4] = resultado[1];
+ 114   1            texto[5] = ':';
+C51 COMPILER V9.56.0.0   MAIN                                                              12/07/2017 18:29:48 PAGE 3   
+
+ 115   1            
+ 116   1            intToChar(seg);
+ 117   1            texto[6] = resultado[0];
+ 118   1            texto[7] = resultado[1];
+ 119   1            
+ 120   1            
+ 121   1            LCDwrite(texto, 0x80);
+ 122   1      }
+ 123          
+ 124          void writeDistancia(){
+ 125   1            unsigned int km, m;
+ 126   1            
+ 127   1            distancia_ant = distancia;
+ 128   1            distancia = PERIMETRO*loops;
+ 129   1            
+ 130   1            km = distancia/1000;
+ 131   1            m = distancia % 1000;
+ 132   1            m = m/10;
+ 133   1            
+ 134   1            cleartexto();
+ 135   1            intToChar(km);
+ 136   1            dist[0] = resultado[0];
+ 137   1            dist[1] = resultado[1];
+ 138   1            dist[2] = ',';
+ 139   1            
+ 140   1            intToChar(m);
+ 141   1            dist[3] = resultado[0];
+ 142   1            dist[4] = resultado[1];
+ 143   1            
+ 144   1            dist[5] = 'k';
+ 145   1            dist[6] = 'm';
+ 146   1            
+ 147   1            LCDwrite(dist, 0xC0);
+ 148   1      
+ 149   1      }
+ 150          
+ 151          void velocidade_inst(){
+ 152   1            //imprime na tela em km/h
+ 153   1            //distancia em metros
+ 154   1            //distancia_ant
+ 155   1            unsigned long int diferenca = distancia - distancia_ant;
+ 156   1            unsigned long int vel_inst = diferenca/3.6;
+ 157   1            intToChar(vel_inst);
+ 158   1            LCDwrite(resultado, 0xC9);
+ 159   1            LCDwrite("km/h", 0xCC);
+ 160   1      }
+ 161          
+ 162          void clear() {
+ 163   1            // as operacoes fazem em sua maioria OR com os registradores especiais
+ 164   1            // entao antes do programa iniciar, essa funcao limpa todos os registradores
+ 165   1            // interrupcoes
+ 166   1            IE = 0x00;
+ 167   1            IP = 0x00;
+ 168   1            // timers
+ 169   1            TMOD = 0x00;
+ 170   1            TCON = 0x00;
+ 171   1      }
+ 172          
+ 173          void velocidade_final(){
+ 174   1      //imprime na tela em km/h
+ 175   1      //distancia em metros
+ 176   1      unsigned int tempo_final = seg + min*60 + hor*60*60; //tempo percorrido em segundos
+C51 COMPILER V9.56.0.0   MAIN                                                              12/07/2017 18:29:48 PAGE 4   
+
+ 177   1      unsigned int vel_med = (distancia/tempo_final)/3.6;
+ 178   1      
+ 179   1            if(tempo_final == 0) vel_med = 0;
+ 180   1      intToChar(vel_med);
+ 181   1      LCDwrite(resultado, 0xC9);
+ 182   1      LCDwrite("km/h", 0xCC);
+ 183   1      }
+ 184          
+ 185          // responsavel pela contagem do sensor
+ 186          // tem prioridade maxima
+ 187          void int_interrupt0(void) interrupt 0 {
+ 188   1            loops++;
+ 189   1            DELAY_ms(200);
+ 190   1            //colocar um delay menor que 240ms aqui!
+ 191   1      }
+ 192          
+ 193          void int_interrupt1(void) interrupt 2 {
+ 194   1            readAllReg();
+ 195   1            writeTime();
+ 196   1            writeDistancia();
+ 197   1            velocidade_inst();
+ 198   1      }
+ 199          
+ 200          void setup() {
+ 201   1        clear();
+ 202   1        LCD();
+ 203   1        initRtcSqrt();
+ 204   1      }
+ 205          
+ 206          void lastRun(){
+ 207   1            intToChar(hor_final);
+ 208   1            texto[0] = resultado[0];
+ 209   1            texto[1] = resultado[1];
+ 210   1            texto[2] = ':';
+ 211   1            
+ 212   1            intToChar(min_final);
+ 213   1            texto[3] = resultado[0];
+ 214   1            texto[4] = resultado[1];
+ 215   1            texto[5] = ':';
+ 216   1            
+ 217   1            intToChar(seg_final);
+ 218   1            texto[6] = resultado[0];
+ 219   1            texto[7] = resultado[1];
+ 220   1            
+ 221   1            LCDwrite(texto, 0x80);
+ 222   1            LCDwrite(dist_final, 0xC0);
+ 223   1            
+ 224   1            velocidade_final();
+ 225   1            while(tecla != '*') 
+ 226   1                  tecla = Read_Keypad();
+ 227   1      }
+ 228          
+ 229          void loop() {
+ 230   1            
+ 231   1            
+ 232   1            while(inRun == 0){
+ 233   2                  LCDwrite("Nova Corrida?", 0x80);
+ 234   2                  LCDwrite("________________", 0xC0);
+ 235   2                  tecla = Read_Keypad();
+ 236   2                  if(tecla == '#'){
+ 237   3                        lastRun();
+ 238   3                        tecla = '_';
+C51 COMPILER V9.56.0.0   MAIN                                                              12/07/2017 18:29:48 PAGE 5   
+
+ 239   3                  }
+ 240   2                  else if (tecla == '*'){
+ 241   3                        inRun = 1;
+ 242   3                        //Sec Min Hour DayofWeek DayofMonth Month Year
+ 243   3                        setTime(0, 0, 0, 0, 0, 0, 0);
+ 244   3                        interrupt0();
+ 245   3                        interrupt1();
+ 246   3                        loops = 0;
+ 247   3                        distancia = 0;
+ 248   3                        }
+ 249   2                  else inRun = 0;
+ 250   2                  }
+ 251   1            
+ 252   1            tecla = '_';
+ 253   1            
+ 254   1            while(tecla != '#'){
+ 255   2                  tecla = Read_Keypad();
+ 256   2            }
+ 257   1            EA = 0;
+ 258   1            inRun = 0;
+ 259   1            
+ 260   1            for(i = 0; i < 7; i++){
+ 261   2                  dist_final[i] = dist[i];
+ 262   2            }
+ 263   1            readAllReg();
+ 264   1            seg_final = seg;
+ 265   1            min_final = min;
+ 266   1            hor_final = hor;
+ 267   1            
+ 268   1            LCDwrite("Fim Corrida!", 0x80);
+ 269   1            LCDwrite("* Nova, # Ultima", 0xC0);
+ 270   1            
+ 271   1      }
+ 272          
+ 273          void main() {
+ 274   1        setup();
+ 275   1        while (1)
+ 276   1          loop();
+ 277   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1220    ----
+   CONSTANT SIZE    =     66    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     70      25
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

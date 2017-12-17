@@ -1,0 +1,320 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        12/07/2017  18:29:48  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+D:\PROGRAM FILES\KEIL\C51\BIN\BL51.EXE .\Objects\STARTUP.obj, .\Objects\main.obj, .\Objects\LCD.obj, .\Objects\interrupt
+>> .obj, .\Objects\rtc.obj, .\Objects\keypad.obj, .\Objects\delay.obj TO .\Objects\final PRINT (.\Listings\final.m51) RA
+>> MSIZE (256) CODE (0X0000-0X3FFF, ?PR?MAIN?* (0X2800))
+
+
+MEMORY MODEL: SMALL WITH FLOATING POINT ARITHMETIC
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\STARTUP.obj (?C_STARTUP)
+  .\Objects\main.obj (MAIN)
+  .\Objects\LCD.obj (LCD)
+  .\Objects\interrupt.obj (INTERRUPT)
+  .\Objects\rtc.obj (RTC)
+  .\Objects\keypad.obj (KEYPAD)
+  .\Objects\delay.obj (DELAY)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51FPS.LIB (?C?FPDIV)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51FPS.LIB (?C?FCAST)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51FPS.LIB (?C?CASTF)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51FPS.LIB (?C?FPGETOPN)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51S.LIB (?C?CLDOPTR)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51S.LIB (?C?IMUL)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51S.LIB (?C?UIDIV)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51S.LIB (?C?SIDIV)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51S.LIB (?C?LMUL)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51S.LIB (?C?ULDIV)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51S.LIB (?C?LNEG)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51S.LIB (STRLEN)
+  D:\PROGRAM FILES\KEIL\C51\LIB\C51S.LIB (?C?CLDPTR)
+
+
+LINK MAP OF MODULE:  .\Objects\final (?C_STARTUP)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0017H     UNIT         _DATA_GROUP_
+                    001FH     0001H                  *** GAP ***
+            BIT     0020H.0   0000H.1   UNIT         ?BI?MAIN
+                    0020H.1   0000H.7                *** GAP ***
+            DATA    0021H     0046H     UNIT         ?DT?MAIN
+            DATA    0067H     0002H     UNIT         ?DT?RTC
+            IDATA   0069H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+                    0000H     0003H                  *** GAP ***
+            CODE    0003H     0003H     ABSOLUTE     
+                    0006H     000DH                  *** GAP ***
+            CODE    0013H     0003H     ABSOLUTE     
+                    0016H     07EAH                  *** GAP ***
+            CODE    0800H     036DH     UNIT         ?C?LIB_CODE
+            CODE    0B6DH     00EBH     UNIT         ?PR?READ_KEYPAD?KEYPAD
+            CODE    0C58H     00C0H     UNIT         ?PR?LOOP?MAIN
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/07/2017  18:29:48  PAGE 2
+
+
+            CODE    0D18H     008CH     UNIT         ?C_C51STARTUP
+            CODE    0DA4H     0089H     UNIT         ?PR?WRITEDISTANCIA?MAIN
+            CODE    0E2DH     007BH     UNIT         ?PR?_SETTIME?MAIN
+            CODE    0EA8H     006EH     UNIT         ?PR?VELOCIDADE_FINAL?MAIN
+            CODE    0F16H     0060H     UNIT         ?C_INITSEG
+            CODE    0F76H     0056H     UNIT         ?PR?WRITETIME?MAIN
+            CODE    0FCCH     0054H     UNIT         ?PR?INT_INTERRUPT0?MAIN
+            CODE    1020H     0054H     UNIT         ?PR?LASTRUN?MAIN
+            CODE    1074H     0047H     UNIT         ?PR?VELOCIDADE_INST?MAIN
+            CODE    10BBH     0044H     UNIT         ?PR?INT_INTERRUPT1?MAIN
+            CODE    10FFH     0042H     UNIT         ?CO?MAIN
+            CODE    1141H     0042H     UNIT         ?PR?_LCDWRITE?LCD
+            CODE    1183H     0041H     UNIT         ?PR?READALLREG?MAIN
+            CODE    11C4H     0038H     UNIT         ?PR?_DELAY_RTC?RTC
+            CODE    11FCH     002FH     UNIT         ?PR?_DEC_TO_BCD?MAIN
+            CODE    122BH     002AH     UNIT         ?PR?_DELAY_KEY?KEYPAD
+            CODE    1255H     0028H     UNIT         ?PR?_BCD_TO_DEC?MAIN
+            CODE    127DH     0026H     UNIT         ?PR?_INTTOCHAR?MAIN
+            CODE    12A3H     0023H     UNIT         ?PR?LCD?LCD
+            CODE    12C6H     001CH     UNIT         ?PR?I2CREAD?RTC
+            CODE    12E2H     001BH     UNIT         ?PR?CLEARTEXTO?MAIN
+            CODE    12FDH     0017H     UNIT         ?PR?_DELAY_MS?DELAY
+            CODE    1314H     0015H     UNIT         ?PR?INITRTCSQRT?MAIN
+            CODE    1329H     0015H     UNIT         ?PR?LCDBUSY?LCD
+            CODE    133EH     0015H     UNIT         ?PR?_I2CSEND?RTC
+            CODE    1353H     0015H     UNIT         ?PR?_STRLEN?STRLEN
+            CODE    1368H     000EH     UNIT         ?PR?_LCDPOSI?LCD
+            CODE    1376H     000EH     UNIT         ?PR?_LCDDATA?LCD
+            CODE    1384H     000DH     UNIT         ?PR?I2CSTART?RTC
+            CODE    1391H     000DH     UNIT         ?PR?I2CSTOP?RTC
+            CODE    139EH     000CH     UNIT         ?PR?_LCDINST?LCD
+            CODE    13AAH     000CH     UNIT         ?PR?_DELAY_US?DELAY
+            CODE    13B6H     000AH     UNIT         ?PR?CLEAR?MAIN
+            CODE    13C0H     000AH     UNIT         ?PR?I2CACK?RTC
+            CODE    13CAH     0009H     UNIT         ?PR?SETUP?MAIN
+            CODE    13D3H     0008H     UNIT         ?PR?I2CNAK?RTC
+            CODE    13DBH     0007H     UNIT         ?PR?INTERRUPT0?INTERRUPT
+            CODE    13E2H     0007H     UNIT         ?PR?INTERRUPT1?INTERRUPT
+                    13E9H     0C17H                  *** GAP ***
+            CODE    2000H     0003H     ABSOLUTE     
+                    2003H     07FDH                  *** GAP ***
+            CODE    2800H     0008H     UNIT         ?PR?MAIN?MAIN
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\final (?C_STARTUP)
+
+
+SEGMENT                             DATA_GROUP 
+  +--> CALLED SEGMENT             START    LENGTH
+-------------------------------------------------
+?C_C51STARTUP                     -----    -----
+  +--> ?PR?MAIN?MAIN
+  +--> ?C_INITSEG
+
+?PR?MAIN?MAIN                     -----    -----
+  +--> ?PR?SETUP?MAIN
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/07/2017  18:29:48  PAGE 3
+
+
+  +--> ?PR?LOOP?MAIN
+
+?PR?SETUP?MAIN                    -----    -----
+  +--> ?PR?CLEAR?MAIN
+  +--> ?PR?LCD?LCD
+  +--> ?PR?INITRTCSQRT?MAIN
+
+?PR?LCD?LCD                       -----    -----
+  +--> ?PR?_LCDINST?LCD
+
+?PR?_LCDINST?LCD                  -----    -----
+  +--> ?PR?LCDBUSY?LCD
+
+?PR?INITRTCSQRT?MAIN              -----    -----
+  +--> ?PR?I2CSTART?RTC
+  +--> ?PR?_I2CSEND?RTC
+  +--> ?PR?I2CSTOP?RTC
+
+?PR?I2CSTART?RTC                  -----    -----
+  +--> ?PR?_DELAY_RTC?RTC
+
+?PR?_I2CSEND?RTC                  -----    -----
+  +--> ?PR?I2CACK?RTC
+
+?PR?I2CACK?RTC                    -----    -----
+  +--> ?PR?_DELAY_RTC?RTC
+
+?PR?I2CSTOP?RTC                   -----    -----
+  +--> ?PR?_DELAY_RTC?RTC
+
+?PR?LOOP?MAIN                     -----    -----
+  +--> ?CO?MAIN
+  +--> ?PR?_LCDWRITE?LCD
+  +--> ?PR?READ_KEYPAD?KEYPAD
+  +--> ?PR?LASTRUN?MAIN
+  +--> ?PR?_SETTIME?MAIN
+  +--> ?PR?INTERRUPT0?INTERRUPT
+  +--> ?PR?INTERRUPT1?INTERRUPT
+  +--> ?PR?READALLREG?MAIN
+
+?PR?_LCDWRITE?LCD                 001AH    0005H
+  +--> ?PR?_LCDPOSI?LCD
+  +--> ?PR?_STRLEN?STRLEN
+  +--> ?PR?_LCDDATA?LCD
+
+?PR?_LCDPOSI?LCD                  -----    -----
+  +--> ?PR?LCDBUSY?LCD
+
+?PR?_LCDDATA?LCD                  -----    -----
+  +--> ?PR?LCDBUSY?LCD
+
+?PR?READ_KEYPAD?KEYPAD            -----    -----
+  +--> ?PR?_DELAY_KEY?KEYPAD
+
+?PR?LASTRUN?MAIN                  -----    -----
+  +--> ?PR?_INTTOCHAR?MAIN
+  +--> ?PR?_LCDWRITE?LCD
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/07/2017  18:29:48  PAGE 4
+
+
+  +--> ?PR?VELOCIDADE_FINAL?MAIN
+  +--> ?PR?READ_KEYPAD?KEYPAD
+
+?PR?VELOCIDADE_FINAL?MAIN         0008H    0002H
+  +--> ?PR?_INTTOCHAR?MAIN
+  +--> ?PR?_LCDWRITE?LCD
+  +--> ?CO?MAIN
+
+?PR?_SETTIME?MAIN                 0008H    000EH
+  +--> ?PR?I2CSTART?RTC
+  +--> ?PR?_I2CSEND?RTC
+  +--> ?PR?_DEC_TO_BCD?MAIN
+  +--> ?PR?I2CSTOP?RTC
+
+?PR?READALLREG?MAIN               0016H    0001H
+  +--> ?PR?I2CSTART?RTC
+  +--> ?PR?_I2CSEND?RTC
+  +--> ?PR?I2CSTOP?RTC
+  +--> ?PR?I2CREAD?RTC
+  +--> ?PR?I2CNAK?RTC
+  +--> ?PR?I2CACK?RTC
+
+?PR?I2CNAK?RTC                    -----    -----
+  +--> ?PR?_DELAY_RTC?RTC
+
+*** NEW ROOT ***************************************************
+
+?PR?INT_INTERRUPT0?MAIN           -----    -----
+  +--> ?PR?_DELAY_MS?DELAY
+
+?PR?_DELAY_MS?DELAY               -----    -----
+  +--> ?PR?_DELAY_US?DELAY
+
+*** NEW ROOT ***************************************************
+
+?PR?INT_INTERRUPT1?MAIN           -----    -----
+  +--> ?PR?READALLREG?MAIN
+  +--> ?PR?WRITETIME?MAIN
+  +--> ?PR?WRITEDISTANCIA?MAIN
+  +--> ?PR?VELOCIDADE_INST?MAIN
+
+?PR?WRITETIME?MAIN                -----    -----
+  +--> ?PR?_BCD_TO_DEC?MAIN
+  +--> ?PR?CLEARTEXTO?MAIN
+  +--> ?PR?_INTTOCHAR?MAIN
+  +--> ?PR?_LCDWRITE?LCD
+
+?PR?WRITEDISTANCIA?MAIN           0016H    0004H
+  +--> ?PR?CLEARTEXTO?MAIN
+  +--> ?PR?_INTTOCHAR?MAIN
+  +--> ?PR?_LCDWRITE?LCD
+
+?PR?VELOCIDADE_INST?MAIN          0016H    0004H
+  +--> ?PR?_INTTOCHAR?MAIN
+  +--> ?PR?_LCDWRITE?LCD
+  +--> ?CO?MAIN
+
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/07/2017  18:29:48  PAGE 5
+
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\final (?C_STARTUP)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        ?C?FPDIV
+  C:0803H         PUBLIC        ?C?FPDIV
+  -------         ENDMOD        ?C?FPDIV
+
+  -------         MODULE        ?C?FCAST
+  C:08AAH         PUBLIC        ?C?FCASTC
+  C:08A5H         PUBLIC        ?C?FCASTI
+  C:08A0H         PUBLIC        ?C?FCASTL
+  -------         ENDMOD        ?C?FCAST
+
+  -------         MODULE        ?C?CASTF
+  C:08DEH         PUBLIC        ?C?CASTF
+  -------         ENDMOD        ?C?CASTF
+
+  -------         MODULE        ?C?CLDOPTR
+  C:095FH         PUBLIC        ?C?CLDOPTR
+  -------         ENDMOD        ?C?CLDOPTR
+
+  -------         MODULE        ?C?IMUL
+  C:098CH         PUBLIC        ?C?IMUL
+  -------         ENDMOD        ?C?IMUL
+
+  -------         MODULE        ?C?UIDIV
+  C:099EH         PUBLIC        ?C?UIDIV
+  -------         ENDMOD        ?C?UIDIV
+
+  -------         MODULE        ?C?SIDIV
+  C:09F3H         PUBLIC        ?C?SIDIV
+  -------         ENDMOD        ?C?SIDIV
+
+  -------         MODULE        ?C?LMUL
+  C:0A29H         PUBLIC        ?C?LMUL
+  -------         ENDMOD        ?C?LMUL
+
+  -------         MODULE        ?C?ULDIV
+  C:0AB4H         PUBLIC        ?C?ULDIV
+  -------         ENDMOD        ?C?ULDIV
+
+  -------         MODULE        ?C?LNEG
+  C:0B46H         PUBLIC        ?C?LNEG
+  -------         ENDMOD        ?C?LNEG
+
+  -------         MODULE        STRLEN
+  C:1353H         PUBLIC        _STRLEN
+  -------         ENDMOD        STRLEN
+
+  -------         MODULE        ?C?CLDPTR
+  C:0B54H         PUBLIC        ?C?CLDPTR
+  -------         ENDMOD        ?C?CLDPTR
+
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/07/2017  18:29:48  PAGE 6
+
+
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?READALLREG?MAIN
+    CALLER1: ?C_C51STARTUP
+    CALLER2: ?PR?INT_INTERRUPT1?MAIN
+
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?_LCDWRITE?LCD
+    CALLER1: ?C_C51STARTUP
+    CALLER2: ?PR?INT_INTERRUPT1?MAIN
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 07F7H BYTE (99%) *
+******************************************************************************
+
+Program Size: data=104.1 xdata=0 code=3066
+LINK/LOCATE RUN COMPLETE.  2 WARNING(S),  0 ERROR(S)
